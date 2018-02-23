@@ -1,3 +1,5 @@
+'use strict';
+
 const megaplan = require('megaplanjs');
 const program = require('commander');
 const log = require('./utils').log;
