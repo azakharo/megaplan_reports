@@ -1,0 +1,15 @@
+{
+  "name": "megaplan-reports",
+  "version": "0.1.0",
+  "description": "",
+  "main": "quart_report.js",
+  "scripts": {
+    "start": "node quart_report.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alexey Zakharov",
+  "license": "ISC",
+  "dependencies": {
+    "megaplanjs": "1.0.1"
+  }
+}
