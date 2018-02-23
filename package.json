@@ -10,6 +10,7 @@
   "author": "Alexey Zakharov",
   "license": "ISC",
   "dependencies": {
+    "commander": "2.14.1",
     "megaplanjs": "1.0.1"
   }
 }
