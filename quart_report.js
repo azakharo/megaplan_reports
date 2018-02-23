@@ -6,6 +6,7 @@ const log = require('./utils').log;
 const exit = process.exit;
 
 
+// Parse the cmd line options
 program
   .version('0.1.0')
   .option('-s, --server [server]', 'Server URL, like \<name\>.megaplan.ru')
@@ -34,16 +35,33 @@ if (!password) {
 log(`Megaplan server: ${server}`);
 log(`Username: ${user}`);
 
-// const client = new megaplan.Client('mp72471385.megaplan.ru')
-//   .auth('zangular@yandex.ru', '755525f3');
-//
-// client.on('auth', function (res, err) {
-//   // store res.access_id, res.secret_key if you need these (see below)
-//   console.log('authenticated', res, err);
-//
-//   client.projects().send(function (tasks) {
-//     console.log(tasks); // a lot of results
-//   }, function (err) {
-//     console.log(err);
-//   });
-// });
+
+// Login
+loginMegaplan(server, user, password, getReportData);
+
+
+///////////////////////////////////////////////////////////
+// Implementation
+
+function loginMegaplan(server, username, password, onSuccess) {
+  const mpClient = new megaplan.Client(server)
+    .auth(username, password);
+
+  mpClient.on('auth', function (res, err) {
+    if (err) {
+      log('Could NOT connect to Megaplan');
+      log(err);
+      exit(2);
+    }
+
+    onSuccess(mpClient);
+  });
+
+}
+
+function getReportData(mpClient) {
+  mpClient.projects().send(
+    projects => log(projects),
+    err => log(err)
+  );
+}
