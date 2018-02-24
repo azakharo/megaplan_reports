@@ -6,6 +6,7 @@ const exit = process.exit;
 const program = require('commander');
 const { prompt } = require('inquirer');
 const chalk = require('chalk');
+var XLSX = require('xlsx');
 const megaplan = require('megaplanjs');
 const log = require('./utils').log;
 
@@ -63,6 +64,9 @@ async function main() {
     exit(3);
   }
   log(data);
+
+  // Write data to XLSX
+  createXlsx(data);
 }
 
 // Start the program
@@ -98,4 +102,25 @@ function getReportData(mpClient) {
       err => reject(err)
     );
   });
+}
+
+function createXlsx(data) {
+  const wb = XLSX.utils.book_new();
+
+  wb.Props = {
+    Title: "Квартальный отчёт",
+    Subject: "Стоимость работ / затраченное время, ресурсы",
+    Author: "Алексей Захаров",
+    CreatedDate: new Date()
+  };
+
+  wb.SheetNames.push("Лист 1");
+
+  const ws_data = [['hello' , 'world']];  //a row with 2 columns
+
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+  wb.Sheets["Лист 1"] = ws;
+
+  XLSX.writeFile(wb, 'test.xlsx');
 }
