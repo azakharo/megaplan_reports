@@ -13,5 +13,9 @@
     "commander": "2.14.1",
     "inquirer": "5.1.0",
     "megaplanjs": "1.0.1"
-  }
+  },
+  "bin": {
+    "quart_report": "./quart_report.js"
+  },
+  "preferGlobal": true
 }
