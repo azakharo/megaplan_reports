@@ -6,62 +6,83 @@ const log = require('./utils').log;
 const exit = process.exit;
 
 
+async function main() {
 // Parse the cmd line options
-program
-  .version('0.1.0')
-  .option('-s, --server [server]', 'Server URL, like \<name\>.megaplan.ru')
-  .option('-u, --user [user]', 'Username')
-  .option('-p, --password [password]', 'Password')
-  .parse(process.argv);
+  program
+    .version('0.1.0')
+    .option('-s, --server [server]', 'Server URL, like \<name\>.megaplan.ru')
+    .option('-u, --user [user]', 'Username')
+    .option('-p, --password [password]', 'Password')
+    .parse(process.argv);
 
-const server = program.server;
-if (!server) {
-  log('Please specify the server');
-  exit(1);
+  const server = program.server;
+  if (!server) {
+    log('Please specify the server');
+    exit(1);
+  }
+
+  const user = program.user;
+  if (!user) {
+    log('Please specify the username');
+    exit(1);
+  }
+
+  const password = program.password;
+  if (!password) {
+    log('Please specify the password');
+    exit(1);
+  }
+
+  log(`Megaplan server: ${server}`);
+  log(`Username: ${user}`);
+
+
+  // Login
+  const mpClient = await loginMegaplan(server, user, password);
+
+  // Get data from Megaplan
+  let data = null;
+  try {
+    data = await getReportData(mpClient);
+  }
+  catch (e) {
+    log(`Could NOT get data from Megaplan: ${e}`);
+    exit(3);
+  }
+  log(data);
 }
 
-const user = program.user;
-if (!user) {
-  log('Please specify the username');
-  exit(1);
-}
-
-const password = program.password;
-if (!password) {
-  log('Please specify the password');
-  exit(1);
-}
-
-log(`Megaplan server: ${server}`);
-log(`Username: ${user}`);
-
-
-// Login
-loginMegaplan(server, user, password, getReportData);
+// Start the program
+main();
 
 
 ///////////////////////////////////////////////////////////
 // Implementation
 
-function loginMegaplan(server, username, password, onSuccess) {
-  const mpClient = new megaplan.Client(server)
-    .auth(username, password);
+function loginMegaplan(server, username, password) {
+  return new Promise(resolve => {
+    const mpClient = new megaplan.Client(server)
+      .auth(username, password);
 
-  mpClient.on('auth', function (res, err) {
-    if (err) {
-      log('Could NOT connect to Megaplan');
-      log(err);
-      exit(2);
-    }
+    mpClient.on('auth', function (res, err) {
+      if (err) {
+        log('Could NOT connect to Megaplan');
+        log(err);
+        exit(2);
+      }
+      log('Login SUCCESS');
 
-    onSuccess(mpClient);
+      resolve(mpClient);
+    });
+
   });
-
 }
 
 function getReportData(mpClient) {
-  mpClient.projects().send(
-    projects => log(projects),
-    err => log(err)
-  );
+  return new Promise((resolve, reject) => {
+    mpClient.projects().send(
+      projects => resolve(projects),
+      err => reject(err)
+    );
+  });
 }
