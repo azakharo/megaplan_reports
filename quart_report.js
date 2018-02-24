@@ -1,9 +1,10 @@
 'use strict';
 
-const megaplan = require('megaplanjs');
-const program = require('commander');
-const log = require('./utils').log;
 const exit = process.exit;
+const program = require('commander');
+const { prompt } = require('inquirer');
+const megaplan = require('megaplanjs');
+const log = require('./utils').log;
 
 
 async function main() {
@@ -12,7 +13,7 @@ async function main() {
     .version('0.1.0')
     .option('-s, --server [server]', 'Server URL, like \<name\>.megaplan.ru')
     .option('-u, --user [user]', 'Username')
-    .option('-p, --password [password]', 'Password')
+    .option('-p, --password [password]', 'Password. If not specified, a user will be asked for it.')
     .parse(process.argv);
 
   const server = program.server;
@@ -27,15 +28,24 @@ async function main() {
     exit(1);
   }
 
-  const password = program.password;
-  if (!password) {
-    log('Please specify the password');
-    exit(1);
-  }
-
   log(`Megaplan server: ${server}`);
   log(`Username: ${user}`);
 
+  let password = program.password;
+  if (!password) {
+    const questions = [{
+      type: 'input',
+      name: 'password',
+      message: 'Please enter password: '
+    }];
+
+    const answers = await prompt(questions);
+    password = answers.password;
+    if (!password) {
+      log('Please specify the password');
+      exit(1);
+    }
+  }
 
   // Login
   const mpClient = await loginMegaplan(server, user, password);
