@@ -5,6 +5,7 @@
 const exit = process.exit;
 const program = require('commander');
 const { prompt } = require('inquirer');
+const chalk = require('chalk');
 const megaplan = require('megaplanjs');
 const log = require('./utils').log;
 
@@ -20,13 +21,13 @@ async function main() {
 
   const server = program.server;
   if (!server) {
-    log('Please specify the server');
+    log(chalk.red('Please specify the server'));
     exit(1);
   }
 
   const user = program.user;
   if (!user) {
-    log('Please specify the username');
+    log(chalk.red('Please specify the username'));
     exit(1);
   }
 
@@ -44,7 +45,7 @@ async function main() {
     const answers = await prompt(questions);
     password = answers.password;
     if (!password) {
-      log('Please specify the password');
+      log(chalk.red('Please specify the password'));
       exit(1);
     }
   }
@@ -58,7 +59,7 @@ async function main() {
     data = await getReportData(mpClient);
   }
   catch (e) {
-    log(`Could NOT get data from Megaplan: ${e}`);
+    log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
     exit(3);
   }
   log(data);
@@ -78,11 +79,11 @@ function loginMegaplan(server, username, password) {
 
     mpClient.on('auth', function (res, err) {
       if (err) {
-        log('Could NOT connect to Megaplan');
+        log(chalk.red('Could NOT connect to Megaplan'));
         log(err);
         exit(2);
       }
-      log('Login SUCCESS');
+      log(chalk.green('Login SUCCESS'));
 
       resolve(mpClient);
     });
