@@ -9,6 +9,7 @@ const chalk = require('chalk');
 var XLSX = require('xlsx');
 const megaplan = require('megaplanjs');
 const log = require('./utils').log;
+const {getEmployees, getProjects, getTasks} = require('./call_megaplan');
 
 
 async function main() {
@@ -66,7 +67,7 @@ async function main() {
   log(data);
 
   // Write data to XLSX
-  createXlsx(data);
+  // createXlsx(data);
 }
 
 // Start the program
@@ -95,13 +96,16 @@ function loginMegaplan(server, username, password) {
   });
 }
 
-function getReportData(mpClient) {
-  return new Promise((resolve, reject) => {
-    mpClient.projects().send(
-      projects => resolve(projects),
-      err => reject(err)
-    );
-  });
+async function getReportData(mpClient) {
+  const employees = await getEmployees(mpClient);
+  const projects = await getProjects(mpClient);
+  const tasks = await getTasks(mpClient);
+
+  return {
+    employees,
+    projects,
+    tasks
+  };
 }
 
 function createXlsx(data) {

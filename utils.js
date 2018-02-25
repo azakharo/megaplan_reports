@@ -5,5 +5,5 @@ function log(msg) {
 }
 
 module.exports = {
-  log : log
+  log
 };

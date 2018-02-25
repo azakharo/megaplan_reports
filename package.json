@@ -13,6 +13,7 @@
     "chalk": "2.3.1",
     "commander": "2.14.1",
     "inquirer": "5.1.0",
+    "lodash": "4.17.5",
     "megaplanjs": "1.0.1",
     "xlsx": "0.12.2"
   },
