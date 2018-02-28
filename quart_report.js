@@ -3,22 +3,26 @@
 'use strict';
 
 const exit = process.exit;
+const moment = require('moment');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const chalk = require('chalk');
 var XLSX = require('xlsx');
-const megaplan = require('megaplanjs');
 const log = require('./utils').log;
-const {getEmployees, getProjects, getTasks, getComments} = require('./call_megaplan');
+const {loginMegaplan, getEmployees, getProjects, getTasks, getComments} = require('./call_megaplan');
 
+const DATE_PRINT_FRMT = 'DD.MM.YYYY HH:mm:ss';
 
 async function main() {
-// Parse the cmd line options
+  // Parse the cmd line options
+  const INPUT_DATE_FRMT = 'DD.MM.YYYY';
   program
     .version('0.1.0')
     .option('-s, --server [server]', 'Server URL, like \<name\>.megaplan.ru')
     .option('-u, --user [user]', 'Username')
     .option('-p, --password [password]', 'Password. If not specified, a user will be asked for it.')
+    .option('--start [start]', `Time period start in format '${INPUT_DATE_FRMT}'. If omitted, the beginning of currect month is used.`)
+    .option('--end [end]', `Time period end in format '${INPUT_DATE_FRMT}'. If omitted, current date is used.`)
     .parse(process.argv);
 
   const server = program.server;
@@ -33,8 +37,8 @@ async function main() {
     exit(1);
   }
 
-  log(`Megaplan server: ${server}`);
-  log(`Username: ${user}`);
+  log(chalk.yellow(`Megaplan server: ${server}`));
+  log(chalk.yellow(`Username: ${user}`));
 
   let password = program.password;
   if (!password) {
@@ -51,6 +55,28 @@ async function main() {
       exit(1);
     }
   }
+
+  let dtStart = moment().startOf('month');
+  let dtEnd = moment();
+  if (program.start) {
+    dtStart = moment(program.start, INPUT_DATE_FRMT, true);
+    if (!dtStart.isValid()) {
+      log(chalk.red(`Invalid time period START: ${program.start}`));
+      exit(1);
+    }
+  }
+  if (program.end) {
+    dtEnd = moment(program.end, INPUT_DATE_FRMT, true);
+    if (!dtEnd.isValid()) {
+      log(chalk.red(`Invalid time period END: ${program.end}`));
+      exit(1);
+    }
+  }
+  if (dtStart.isAfter(dtEnd)) {
+    log(chalk.red(`Invalid time period: ${getTimePeriodStr(dtStart, dtEnd)}`));
+    exit(1);
+  }
+  log(chalk.yellow(`Time period: ${getTimePeriodStr(dtStart, dtEnd)}`));
 
   // Login
   const mpClient = await loginMegaplan(server, user, password);
@@ -77,29 +103,26 @@ main();
 ///////////////////////////////////////////////////////////
 // Implementation
 
-function loginMegaplan(server, username, password) {
-  return new Promise(resolve => {
-    const mpClient = new megaplan.Client(server)
-      .auth(username, password);
-
-    mpClient.on('auth', function (res, err) {
-      if (err) {
-        log(chalk.red('Could NOT connect to Megaplan'));
-        log(err);
-        exit(2);
-      }
-      log(chalk.green('Login SUCCESS'));
-
-      resolve(mpClient);
-    });
-
-  });
+function getTimePeriodStr(start, end) {
+  return `${start.format(DATE_PRINT_FRMT)} - ${end.format(DATE_PRINT_FRMT)}`;
 }
 
 async function getReportData(mpClient) {
   const employees = await getEmployees(mpClient);
+
   const projects = await getProjects(mpClient);
+  // Filter projects by start, end
+
   const tasks = await getTasks(mpClient);
+  // TODO tasks detailed or not?
+  // TODO request tasks with filter?
+  // Filter tasks by start, end
+
+  // Get comments per task
+  // Filter comments, leave only if:
+  // work comment
+  // datatime is from the range
+  // Associate comments with task
   for (const task of tasks) {
     let comments = null;
     try {

@@ -1,7 +1,29 @@
 'use strict';
 
 const {values, isEmpty} = require('lodash');
+const chalk = require('chalk');
+const megaplan = require('megaplanjs');
+const log = require('./utils').log;
 
+
+function loginMegaplan(server, username, password) {
+  return new Promise(resolve => {
+    const mpClient = new megaplan.Client(server)
+      .auth(username, password);
+
+    mpClient.on('auth', function (res, err) {
+      if (err) {
+        log(chalk.red('Could NOT connect to Megaplan'));
+        log(err);
+        exit(2);
+      }
+      log(chalk.green('Login SUCCESS'));
+
+      resolve(mpClient);
+    });
+
+  });
+}
 
 function getEmployees(mpClient) {
   return new Promise((resolve, reject) => {
@@ -64,6 +86,7 @@ function getComments(mpClient, taskID) {
 }
 
 module.exports = {
+  loginMegaplan,
   getEmployees,
   getProjects,
   getTasks,
