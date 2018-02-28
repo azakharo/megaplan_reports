@@ -12,10 +12,10 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   const allProjects = await getProjects(mpClient);
   // Filter projects by start, end
   const projects = filter(allProjects, prj => (
-    !(moment(prj.time_created).isSameOrAfter(dtEnd) || moment(prj.activity).isSameOrBefore(dtStart))
+    !(moment(prj.time_created).isSameOrAfter(dtEnd) || moment(prj.time_updated).isSameOrBefore(dtStart))
   ));
   // for (const prj of projects) {
-  //   log(prj.name);
+  //   logData(prj);
   // }
 
   // const tasks = await getTasks(mpClient);
