@@ -48,8 +48,24 @@ function getTasks(mpClient) {
   });
 }
 
+function getComments(mpClient, taskID) {
+  return new Promise((resolve, reject) => {
+    mpClient.task_comments(taskID).send(
+      data => {
+        let comments = [];
+        if (data && data.comments) {
+          comments = values(data.comments);
+        }
+        resolve(comments);
+      },
+      err => reject(err)
+    );
+  });
+}
+
 module.exports = {
   getEmployees,
   getProjects,
-  getTasks
+  getTasks,
+  getComments
 };

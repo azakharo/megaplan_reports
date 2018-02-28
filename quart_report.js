@@ -9,7 +9,7 @@ const chalk = require('chalk');
 var XLSX = require('xlsx');
 const megaplan = require('megaplanjs');
 const log = require('./utils').log;
-const {getEmployees, getProjects, getTasks} = require('./call_megaplan');
+const {getEmployees, getProjects, getTasks, getComments} = require('./call_megaplan');
 
 
 async function main() {
@@ -56,15 +56,15 @@ async function main() {
   const mpClient = await loginMegaplan(server, user, password);
 
   // Get data from Megaplan
-  let data = null;
-  try {
-    data = await getReportData(mpClient);
-  }
-  catch (e) {
-    log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
-    exit(3);
-  }
-  log(data);
+  // let data = null;
+  // try {
+  //   data = await getReportData(mpClient);
+  // }
+  // catch (e) {
+  //   log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
+  //   exit(3);
+  // }
+  // log(JSON.stringify(data.tasks, null, 2));
 
   // Write data to XLSX
   // createXlsx(data);
@@ -100,6 +100,20 @@ async function getReportData(mpClient) {
   const employees = await getEmployees(mpClient);
   const projects = await getProjects(mpClient);
   const tasks = await getTasks(mpClient);
+  for (const task of tasks) {
+    let comments = null;
+    try {
+      comments = await getComments(mpClient, task.id);
+      // if (comments.length > 0) {
+      //   log(`TASK ${task.name}`);
+      //   log(JSON.stringify(comments, null, 2));
+      //   log('==================================');
+      // }
+    }
+    catch (e) {
+      log(chalk.red(JSON.stringify(e, null, 2)));
+    }
+  }
 
   return {
     employees,
