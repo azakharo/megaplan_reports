@@ -73,7 +73,7 @@ async function main() {
       exit(1);
     }
   }
-  if (dtStart.isAfter(dtEnd)) {
+  if (dtStart.isSameOrAfter(dtEnd)) {
     log(chalk.red(`Invalid time period: ${getTimePeriodStr(dtStart, dtEnd)}`));
     exit(1);
   }
@@ -85,7 +85,7 @@ async function main() {
   // Get data from Megaplan
   let data = null;
   try {
-    data = await getReportData(mpClient);
+    data = await getReportData(mpClient, dtStart, dtEnd);
   }
   catch (e) {
     log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
