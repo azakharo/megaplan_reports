@@ -65,6 +65,7 @@ async function main() {
       log(chalk.red(`Invalid time period START: ${program.start}`));
       exit(1);
     }
+    dtStart = dtStart.startOf('day');
   }
   if (program.end) {
     dtEnd = moment(program.end, INPUT_DATE_FRMT, true);
@@ -72,6 +73,7 @@ async function main() {
       log(chalk.red(`Invalid time period END: ${program.end}`));
       exit(1);
     }
+    dtEnd = dtEnd.endOf('day');
   }
   if (dtStart.isSameOrAfter(dtEnd)) {
     log(chalk.red(`Invalid time period: ${getTimePeriodStr(dtStart, dtEnd)}`));

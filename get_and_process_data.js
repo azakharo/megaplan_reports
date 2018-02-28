@@ -11,18 +11,20 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
 
   const allProjects = await getProjects(mpClient);
   // Filter projects by start, end
-  const projects = filter(allProjects, prj => (
-    !(moment(prj.time_created).isSameOrAfter(dtEnd) || moment(prj.time_updated).isSameOrBefore(dtStart))
-  ));
+  const projects = filter(allProjects, prj => filterByStartEnd(prj, dtStart, dtEnd));
   // for (const prj of projects) {
   //   logData(prj);
   // }
 
-  // const tasks = await getTasks(mpClient);
-  // // TODO tasks detailed or not?
-  // // TODO request tasks with filter?
-  // // Filter tasks by start, end
-  //
+  const allTasks = await getTasks(mpClient);
+  // TODO tasks detailed or not?
+  // TODO request tasks with filter?
+  // Filter tasks by start, end
+  const tasks = filter(allTasks, task => filterByStartEnd(task, dtStart, dtEnd));
+  // for (const task of tasks) {
+  //   logData(task);
+  // }
+
   // // Get comments per task
   // // Filter comments, leave only if:
   // // work comment
@@ -50,3 +52,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   // };
   return {};
 };
+
+function filterByStartEnd(entity, start, end) {
+  return !(moment(entity.time_created).isSameOrAfter(end) || moment(entity.time_updated).isSameOrBefore(start));
+}
