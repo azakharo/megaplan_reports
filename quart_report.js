@@ -9,7 +9,8 @@ const { prompt } = require('inquirer');
 const chalk = require('chalk');
 var XLSX = require('xlsx');
 const log = require('./utils').log;
-const {loginMegaplan, getEmployees, getProjects, getTasks, getComments} = require('./call_megaplan');
+const {loginMegaplan} = require('./call_megaplan');
+const getReportData = require('./get_and_process_data');
 
 const DATE_PRINT_FRMT = 'DD.MM.YYYY HH:mm:ss';
 
@@ -82,14 +83,14 @@ async function main() {
   const mpClient = await loginMegaplan(server, user, password);
 
   // Get data from Megaplan
-  // let data = null;
-  // try {
-  //   data = await getReportData(mpClient);
-  // }
-  // catch (e) {
-  //   log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
-  //   exit(3);
-  // }
+  let data = null;
+  try {
+    data = await getReportData(mpClient);
+  }
+  catch (e) {
+    log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
+    exit(3);
+  }
   // log(JSON.stringify(data.tasks, null, 2));
 
   // Write data to XLSX
@@ -105,44 +106,6 @@ main();
 
 function getTimePeriodStr(start, end) {
   return `${start.format(DATE_PRINT_FRMT)} - ${end.format(DATE_PRINT_FRMT)}`;
-}
-
-async function getReportData(mpClient) {
-  const employees = await getEmployees(mpClient);
-
-  const projects = await getProjects(mpClient);
-  // Filter projects by start, end
-
-  const tasks = await getTasks(mpClient);
-  // TODO tasks detailed or not?
-  // TODO request tasks with filter?
-  // Filter tasks by start, end
-
-  // Get comments per task
-  // Filter comments, leave only if:
-  // work comment
-  // datatime is from the range
-  // Associate comments with task
-  for (const task of tasks) {
-    let comments = null;
-    try {
-      comments = await getComments(mpClient, task.id);
-      // if (comments.length > 0) {
-      //   log(`TASK ${task.name}`);
-      //   log(JSON.stringify(comments, null, 2));
-      //   log('==================================');
-      // }
-    }
-    catch (e) {
-      log(chalk.red(JSON.stringify(e, null, 2)));
-    }
-  }
-
-  return {
-    employees,
-    projects,
-    tasks
-  };
 }
 
 function createXlsx(data) {
