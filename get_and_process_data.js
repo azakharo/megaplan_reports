@@ -74,6 +74,21 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
     proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), 0);
   });
 
+  log('Calculate work per employee (total)');
+  employees.forEach(empl => {
+    empl.totalWork = 0;
+    tasks.forEach(task => {
+      const taskWork = task.employee2work[empl.id];
+      if (taskWork) {
+        empl.totalWork += taskWork;
+      }
+    });
+  });
+  // for (const e of employees) {
+  //   log(e.name);
+  //   log(e.totalWork);
+  // }
+
   // return {
   //   employees,
   //   projects,
