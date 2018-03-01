@@ -3,7 +3,7 @@
 const {filter} = require('lodash');
 const moment = require('moment');
 const {getEmployees, getProjects, getTasks, getComments} = require('./call_megaplan');
-const {log, logData} = require('./utils');
+const {log, stringify, logData} = require('./utils');
 
 
 module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
@@ -30,26 +30,30 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   //   logData(task);
   // }
 
-  // // Get comments per task
-  // // Filter comments, leave only if:
-  // // work comment
-  // // datatime is from the range
-  // // Associate comments with task
-  // for (const task of tasks) {
-  //   let comments = null;
-  //   try {
-  //     comments = await getComments(mpClient, task.id);
-  //     // if (comments.length > 0) {
-  //     //   log(`TASK ${task.name}`);
-  //     //   log(JSON.stringify(comments, null, 2));
-  //     //   log('==================================');
-  //     // }
-  //   }
-  //   catch (e) {
-  //     log(chalk.red(JSON.stringify(e, null, 2)));
-  //   }
-  // }
-  //
+  // Get comments per task
+  log('Loading comments...');
+  for (const task of tasks) {
+    let allComments = null;
+    try {
+      allComments = await getComments(mpClient, task.id);
+    }
+    catch (e) {
+      log(chalk.red(stringify(e)));
+      exit(2);
+    }
+
+    // Filter comments
+    const commentsFiltered = filter(allComments, c => {
+      const dt = moment(c.time_created);
+      return c.work && (dt.isSameOrAfter(dtStart) && dt.isSameOrBefore(dtEnd));
+    });
+
+    log(`'${task.name}' comments loaded ${allComments.length}, after filtering: ${commentsFiltered.length}`);
+
+    // Associate comments with task
+    task.comments = commentsFiltered;
+  }
+
   // return {
   //   employees,
   //   projects,

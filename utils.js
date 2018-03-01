@@ -5,10 +5,15 @@ function log(msg) {
 }
 
 function logData(data) {
-  console.log(JSON.stringify(data, null, 2));
+  console.log(stringify(data));
+}
+
+function stringify(data) {
+  return JSON.stringify(data, null, 2);
 }
 
 module.exports = {
   log,
+  stringify,
   logData
 };
