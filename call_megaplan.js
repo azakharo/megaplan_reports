@@ -8,6 +8,7 @@ const log = require('./utils').log;
 
 function loginMegaplan(server, username, password) {
   return new Promise(resolve => {
+    extendMegaplanClient();
     const mpClient = new megaplan.Client(server)
       .auth(username, password);
 
@@ -85,10 +86,49 @@ function getComments(mpClient, taskID) {
   });
 }
 
+function extendMegaplanClient() {
+  megaplan.Client.prototype.task_extra_fields = function (task_id) {
+    return this.__request('::task/extFieldsMetadata.api', { id: task_id });
+  };
+  megaplan.Client.prototype.task_with_extra_fields = function (task_id, extra_fields) {
+    const fldNames = extra_fields.map(f => f.name);
+    return this.__request('::task/card.api', { id: task_id, extra_fields: fldNames });
+  };
+}
+
+function getExtraFields(mpClient, taskID) {
+  return new Promise((resolve, reject) => {
+    mpClient.task_extra_fields(taskID).send(
+      data => {
+        let extraFlds = [];
+        if (!isEmpty(data) && data.fields) {
+          extraFlds = values(data.fields);
+        }
+        resolve(extraFlds);
+      },
+      err => reject(err)
+    );
+  });
+}
+
+function getTaskWithExtraFields(mpClient, taskID, extraFields) {
+  return new Promise((resolve, reject) => {
+    mpClient.task_with_extra_fields(taskID, extraFields).send(
+      data => {
+        resolve(data.task);
+      },
+      err => reject(err)
+    );
+  });
+}
+
+
 module.exports = {
   loginMegaplan,
   getEmployees,
   getProjects,
   getTasks,
-  getComments
+  getComments,
+  getExtraFields,
+  getTaskWithExtraFields
 };
