@@ -8,19 +8,24 @@ const {log, logData} = require('./utils');
 
 module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   const employees = await getEmployees(mpClient);
+  log(`Loaded ${employees.length} employees`);
 
   const allProjects = await getProjects(mpClient);
+  log(`Loaded ${allProjects.length} projects`);
   // Filter projects by start, end
   const projects = filter(allProjects, prj => filterByStartEnd(prj, dtStart, dtEnd));
+  log(`Projects after filtering: ${projects.length}`);
   // for (const prj of projects) {
   //   logData(prj);
   // }
 
   const allTasks = await getTasks(mpClient);
+  log(`Loaded ${allTasks.length} tasks`);
   // TODO tasks detailed or not?
   // TODO request tasks with filter?
   // Filter tasks by start, end
   const tasks = filter(allTasks, task => filterByStartEnd(task, dtStart, dtEnd));
+  log(`Tasks after filtering: ${tasks.length}`);
   // for (const task of tasks) {
   //   logData(task);
   // }
