@@ -3,11 +3,12 @@
 'use strict';
 
 const exit = process.exit;
+const fs = require('fs');
 const moment = require('moment');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const chalk = require('chalk');
-const log = require('./utils').log;
+const {log, stringify} = require('./utils');
 const {loginMegaplan} = require('./call_megaplan');
 const getReportData = require('./get_and_process_data');
 const createXlsx = require('./create_xlsx');
@@ -82,19 +83,39 @@ async function main() {
   }
   log(chalk.yellow(`Time period: ${getTimePeriodStr(dtStart, dtEnd)}`));
 
-  // Login
-  const mpClient = await loginMegaplan(server, user, password);
-
-  // Get data from Megaplan
-  let data = null;
+  let fileCont = null;
   try {
-    data = await getReportData(mpClient, dtStart, dtEnd);
+    fileCont = fs.readFileSync('D:\\Temp\\megaplan.json', 'utf8');
   }
-  catch (e) {
-    log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
-    exit(3);
+  catch (e) {}
+
+  let data = null;
+  if (!fileCont) {
+    // Login
+    const mpClient = await loginMegaplan(server, user, password);
+
+    // Get data from Megaplan
+    try {
+      data = await getReportData(mpClient, dtStart, dtEnd);
+    }
+    catch (e) {
+      log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
+      exit(3);
+    }
+
+    fs.writeFileSync('D:\\Temp\\megaplan.json', stringify(data) , 'utf-8');
+  }
+  else {
+    try {
+      data = JSON.parse(fileCont);
+    }
+    catch (e) {
+      logData(e);
+      exit(2);
+    }
   }
 
+  log(data.employees[0]);
   // Write data to XLSX
   createXlsx(data, dtStart, dtEnd);
 }
