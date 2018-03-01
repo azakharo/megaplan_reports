@@ -26,6 +26,7 @@ async function main() {
     .option('-p, --password [password]', 'Password. If not specified, a user will be asked for it.')
     .option('--start [start]', `Time period start in format '${INPUT_DATE_FRMT}'. If omitted, the beginning of currect month is used.`)
     .option('--end [end]', `Time period end in format '${INPUT_DATE_FRMT}'. If omitted, current date is used.`)
+    .option('-o, --outdir [outdir]', 'Directory to place the report into. If not specified, the current working directory is used.')
     .parse(process.argv);
 
   const server = program.server;
@@ -83,6 +84,8 @@ async function main() {
   }
   log(chalk.yellow(`Time period: ${getTimePeriodStr(dtStart, dtEnd)}`));
 
+  const outdir = program.outdir || process.cwd();
+
   let fileCont = null;
   try {
     fileCont = fs.readFileSync('D:\\Temp\\megaplan.json', 'utf8');
@@ -115,9 +118,8 @@ async function main() {
     }
   }
 
-  log(data.employees[0]);
   // Write data to XLSX
-  createXlsx(data, dtStart, dtEnd);
+  createXlsx(data, dtStart, dtEnd, outdir);
 }
 
 // Start the program
