@@ -84,6 +84,10 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
       }
     });
   });
+
+  const totalTotal = reduce(projects, (total, proj) => (total + proj.totalWork), 0);
+  // log(totalTotal);
+
   // for (const e of employees) {
   //   log(e.name);
   //   log(e.totalWork);
