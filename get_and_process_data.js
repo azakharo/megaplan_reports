@@ -1,6 +1,6 @@
 'use strict';
 
-const {filter} = require('lodash');
+const {filter, reduce} = require('lodash');
 const moment = require('moment');
 const {getEmployees, getProjects, getTasks, getComments} = require('./call_megaplan');
 const {log, stringify, logData} = require('./utils');
@@ -63,11 +63,16 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
     log(`Tasks remaining after all the filtering: ${tasks.length}`);
   }
 
-  // Calc works for tasks
+  log('Calculate work per task');
   for (const task of tasks) {
     calcTaskWork(task);
-    logData(task);
   }
+
+  log('Calculate work per project');
+  projects.forEach(proj => {
+    proj.tasks = filter(tasks, t => t.project.id === proj.id);
+    proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), 0);
+  });
 
   // return {
   //   employees,
