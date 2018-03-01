@@ -60,6 +60,13 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   const tasksWithCommentsCount = tasks.length;
   if (tasksWithCommentsCount !== tasksBeforeCommentFilterCount) {
     log(`Found ${tasksBeforeCommentFilterCount - tasksWithCommentsCount} tasks w/out comments. They are ignored.`);
+    log(`Tasks remaining after all the filtering: ${tasks.length}`);
+  }
+
+  // Calc works for tasks
+  for (const task of tasks) {
+    calcTaskWork(task);
+    logData(task);
   }
 
   // return {
@@ -69,6 +76,25 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   // };
   return {};
 };
+
+function calcTaskWork(task) {
+  task.employee2work = {};
+  task.totalWork = 0;
+
+  task.comments.forEach(comment => {
+    const empID = comment.author.id;
+    const work = comment.work;
+
+    if (task.employee2work[empID]) {
+      task.employee2work[empID] += work;
+    }
+    else {
+      task.employee2work[empID] = work;
+    }
+
+    task.totalWork += work;
+  });
+}
 
 function filterByStartEnd(entity, start, end) {
   return !(moment(entity.time_created).isSameOrAfter(end) || moment(entity.time_updated).isSameOrBefore(start));
