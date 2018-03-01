@@ -24,8 +24,8 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   // TODO tasks detailed or not?
   // TODO request tasks with filter?
   // Filter tasks by start, end
-  const tasks = filter(allTasks, task => filterByStartEnd(task, dtStart, dtEnd));
-  log(`Tasks after filtering: ${tasks.length}`);
+  let tasks = filter(allTasks, task => filterByStartEnd(task, dtStart, dtEnd));
+  log(`Tasks after filtering by start/end time: ${tasks.length}`);
   // for (const task of tasks) {
   //   logData(task);
   // }
@@ -52,6 +52,14 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
 
     // Associate comments with task
     task.comments = commentsFiltered;
+  }
+
+  // Remove tasks with no comments
+  const tasksBeforeCommentFilterCount = tasks.length;
+  tasks = filter(tasks, t => t.comments.length > 0);
+  const tasksWithCommentsCount = tasks.length;
+  if (tasksWithCommentsCount !== tasksBeforeCommentFilterCount) {
+    log(`Found ${tasksBeforeCommentFilterCount - tasksWithCommentsCount} tasks w/out comments. They are ignored.`);
   }
 
   // return {
