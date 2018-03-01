@@ -7,12 +7,13 @@ const moment = require('moment');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const chalk = require('chalk');
-var XLSX = require('xlsx');
 const log = require('./utils').log;
 const {loginMegaplan} = require('./call_megaplan');
 const getReportData = require('./get_and_process_data');
+const createXlsx = require('./create_xlsx');
 
 const DATE_PRINT_FRMT = 'DD.MM.YYYY HH:mm:ss';
+
 
 async function main() {
   // Parse the cmd line options
@@ -93,10 +94,9 @@ async function main() {
     log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
     exit(3);
   }
-  // log(JSON.stringify(data.tasks, null, 2));
 
   // Write data to XLSX
-  // createXlsx(data);
+  createXlsx(data, dtStart, dtEnd);
 }
 
 // Start the program
@@ -104,29 +104,8 @@ main();
 
 
 ///////////////////////////////////////////////////////////
-// Implementation
+// Implementation details
 
 function getTimePeriodStr(start, end) {
   return `${start.format(DATE_PRINT_FRMT)} - ${end.format(DATE_PRINT_FRMT)}`;
-}
-
-function createXlsx(data) {
-  const wb = XLSX.utils.book_new();
-
-  wb.Props = {
-    Title: "Квартальный отчёт",
-    Subject: "Стоимость работ / затраченное время, ресурсы",
-    Author: "Алексей Захаров",
-    CreatedDate: new Date()
-  };
-
-  wb.SheetNames.push("Лист 1");
-
-  const ws_data = [['hello' , 'world']];  //a row with 2 columns
-
-  const ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-  wb.Sheets["Лист 1"] = ws;
-
-  XLSX.writeFile(wb, 'test.xlsx');
 }
