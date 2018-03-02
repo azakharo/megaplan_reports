@@ -52,11 +52,12 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
       }
     };
 
-    const cellAddress = {c: colInd, r: lineNum};
-    const cellRef = XLSX.utils.encode_cell(cellAddress);
-    ws[cellRef] = cell;
+    drawCell(cell, ws, lineNum, colInd);
   });
   lineNum += 1;
+
+  // Draw the data table's body
+
 
   // Finalize the document (finalize ws)
   const lastColIndex = cols.length - 1;
@@ -66,3 +67,9 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   // Write report to file
   XLSX.writeFile(wb, `${outdir}\\test.xlsx`);
 };
+
+function drawCell(cell, ws, row, col) {
+  const cellAddress = {c: col, r: row};
+  const cellRef = XLSX.utils.encode_cell(cellAddress);
+  ws[cellRef] = cell;
+}
