@@ -78,7 +78,7 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
     }
     // Draw employee's project work (total)
     employees.forEach((empl, emplInd) => {
-      drawCell({t: 'n', z: '0', v: empl.proj2work.get(prj.id) || 0}, ws, lineNum, employeeColStart + emplInd);
+      drawCell({t: 'n', z: '0', v: empl.proj2work[prj.id] || 0}, ws, lineNum, employeeColStart + emplInd);
     });
 
     lineNum += 1;

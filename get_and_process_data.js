@@ -78,7 +78,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   employees.forEach(empl => {
     empl.totalWork = 0;
     tasks.forEach(task => {
-      const taskWork = task.employee2work.get(empl.id);
+      const taskWork = task.employee2work[empl.id];
       if (taskWork) {
         empl.totalWork += taskWork;
       }
@@ -87,10 +87,10 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
 
   log('Calculate employee work per project');
   employees.forEach(empl => {
-    empl.proj2work = new Map();
+    empl.proj2work = {};
     projects.forEach(proj => {
-      const reduceRes = reduce(proj.tasks, (total, task) => (total + (task.employee2work.get(empl.id) || 0)), 0);
-      empl.proj2work.set(proj.id, reduceRes);
+      empl.proj2work[proj.id] =
+        reduce(proj.tasks, (total, task) => (total + (task.employee2work[empl.id] || 0)), 0);
     });
   });
 
@@ -106,15 +106,15 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
 };
 
 function calcTaskWork(task) {
-  task.employee2work = new Map();
+  task.employee2work = {};
   task.totalWork = 0;
 
   task.comments.forEach(comment => {
     const empID = comment.author.id;
     const work = comment.work;
 
-    const prevWork = task.employee2work.get(empID) || 0;
-    task.employee2work.set(empID, prevWork + work);
+    const prevWork = task.employee2work[empID] || 0;
+    task.employee2work[empID] = prevWork + work;
 
     task.totalWork += work;
   });
