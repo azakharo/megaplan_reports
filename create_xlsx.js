@@ -76,12 +76,29 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
     if (projPlannedWork) {
       drawCell({t: 'n', z: '0.00', v: prj.totalWork / projPlannedWork}, ws, lineNum, COL_WORK_PLANNED_RATION);
     }
-    // Draw employee's project work (total)
+    // Draw work hours per employee
     employees.forEach((empl, emplInd) => {
       drawCell({t: 'n', z: '0', v: empl.proj2work[prj.id] || 0}, ws, lineNum, employeeColStart + emplInd);
     });
-
     lineNum += 1;
+
+    // Draw the project's task lines
+    prj.tasks.forEach(task => {
+      const taskWorkFromCard = +task.actual_work_with_sub_tasks;
+      const taskPlannedWork = +task.planned_work;
+      drawCell({t: 's', v: task.name}, ws, lineNum, COL_TASK);
+      drawCell({t: 'n', z: '0', v: taskWorkFromCard}, ws, lineNum, COL_WORK_FROM_CARD);
+      drawCell({t: 'n', z: '0', v: task.totalWork}, ws, lineNum, COL_WORK);
+      drawCell({t: 'n', z: '0', v: taskPlannedWork}, ws, lineNum, COL_WORK_PLANNED);
+      if (taskPlannedWork) {
+        drawCell({t: 'n', z: '0.00', v: task.totalWork / taskPlannedWork}, ws, lineNum, COL_WORK_PLANNED_RATION);
+      }
+      // Draw work hours per employee
+      employees.forEach((empl, emplInd) => {
+        drawCell({t: 'n', z: '0', v: task.employee2work[empl.id] || 0}, ws, lineNum, employeeColStart + emplInd);
+      });
+      lineNum += 1;
+    });
   });
 
   // Finalize the document (finalize ws)
