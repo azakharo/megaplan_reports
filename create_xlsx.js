@@ -44,7 +44,12 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   colProps.forEach((col, colInd) => {
     const cell = {
       t: "s",
-      v: col.title
+      v: col.title,
+      s: {
+        font: {
+          bold: true
+        }
+      }
     };
 
     const cellAddress = {c: colInd, r: lineNum};

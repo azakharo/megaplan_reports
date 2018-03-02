@@ -16,7 +16,7 @@
     "lodash": "4.17.5",
     "megaplanjs": "1.0.1",
     "moment": "2.20.1",
-    "xlsx": "0.12.2"
+    "xlsx": "git+https://github.com/xSirrioNx/js-xlsx.git"
   },
   "bin": {
     "quart_report": "./quart_report.js"
