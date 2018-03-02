@@ -18,12 +18,18 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
 
   // Init variables
   let lineNum = 0;
-  const employeeNames = data.employees.map(e => e.name);
-  let colNames = ['Проект', 'Задача', 'Затраченное время из карточки', 'Затраченное время',
-    'Запланированное время', 'Затраченное/запланированное время'];
-  const employeeColStart = colNames.length;
-  colNames = concat(colNames, employeeNames);
-  const cols = times(colNames.length, constant({wch: 25}));
+  const emplColProps = data.employees.map(e => ({title: e.name, width: 18}));
+  let colProps = [
+    {title: 'Проект', width: 25},
+    {title: 'Задача', width: 40},
+    {title: 'Затрач. время из карточки', width: 23},
+    {title: 'Затраченное время', width: 17},
+    {title: 'Запланированное время', width: 21},
+    {title: 'Затрач/запланир.', width: 15}
+  ];
+  const employeeColStart = colProps.length;
+  colProps = concat(colProps, emplColProps);
+  const cols = colProps.map(c => ({wch: c.width}));
 
   // Create worksheet
   wb.SheetNames.push(SHEET_NAME);
@@ -34,15 +40,10 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   const ws = wb.Sheets[SHEET_NAME];
 
   // Draw the header
-  colNames.forEach((col, colInd) => {
+  colProps.forEach((col, colInd) => {
     const cell = {
       t: "s",
-      v: col,
-      s: {
-        font: {
-          bold: true
-        }
-      }
+      v: col.title
     };
 
     const cellAddress = {c: colInd, r: lineNum};
