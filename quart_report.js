@@ -8,12 +8,10 @@ const moment = require('moment');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const chalk = require('chalk');
-const {log, stringify} = require('./utils');
+const {log, stringify, getTimePeriodStr} = require('./utils');
 const {loginMegaplan} = require('./call_megaplan');
 const getReportData = require('./get_and_process_data');
 const createXlsx = require('./create_xlsx');
-
-const DATE_PRINT_FRMT = 'DD.MM.YYYY HH:mm:ss';
 
 
 async function main() {
@@ -124,11 +122,3 @@ async function main() {
 
 // Start the program
 main();
-
-
-///////////////////////////////////////////////////////////
-// Implementation details
-
-function getTimePeriodStr(start, end) {
-  return `${start.format(DATE_PRINT_FRMT)} - ${end.format(DATE_PRINT_FRMT)}`;
-}

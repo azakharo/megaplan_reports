@@ -1,7 +1,8 @@
 'use strict';
 
-const {concat, times, constant} = require('lodash');
+const {concat} = require('lodash');
 const XLSX = require('xlsx');
+const {getTimePeriodStr} = require('./utils');
 
 
 module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
@@ -21,7 +22,7 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   const emplColProps = data.employees.map(e => ({title: e.name, width: 18}));
   let colProps = [
     {title: 'Проект', width: 25},
-    {title: 'Задача', width: 40},
+    {title: `Задачи за ${getTimePeriodStr(dtStart, dtEnd)}`, width: 44},
     {title: 'Затрач. время из карточки', width: 23},
     {title: 'Затраченное время', width: 17},
     {title: 'Запланированное время', width: 21},
