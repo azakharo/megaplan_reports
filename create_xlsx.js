@@ -1,6 +1,6 @@
 'use strict';
 
-const {concat} = require('lodash');
+const {concat, reduce} = require('lodash');
 const XLSX = require('xlsx');
 const {getTimePeriodStr, log} = require('./utils');
 
@@ -21,7 +21,7 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   let lineNum = 0;
   const emplColProps = data.employees.map(e => ({title: e.name, width: 18}));
   let colProps = [
-    {title: 'Проект', width: 25},
+    {title: 'Проект', width: 30},
     {title: `Задачи за ${getTimePeriodStr(dtStart, dtEnd)}`, width: 44},
     {title: 'Затрач. время из карточки', width: 23},
     {title: 'Затраченное время', width: 17},
@@ -67,7 +67,6 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   const employees = data.employees;
   const projLineStyle = {
     fill: {
-      patternType: "solid",
       fgColor: {rgb: "FFFF75"} // Actually set's background
     },
     border: {
@@ -117,6 +116,40 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
       });
       lineNum += 1;
     });
+  });
+
+  // Draw the final line (total-total)
+  const allProjWorkFromCard = reduce(projects, (total, proj) => (total + (+proj.actual_work_with_sub_tasks)), 0);
+  const allProjPlannedWork = reduce(projects, (total, proj) => (total + (+proj.planned_work)), 0);
+  const totalLineStyle = {
+    font: {bold: true},
+    fill: {
+      fgColor: {rgb: "FFFF75"} // Actually set's background
+    },
+    border: {
+      top: {style: "thin", color: {auto: 1}},
+      right: {style: "thin", color: {auto: 1}},
+      bottom: {style: "thin", color: {auto: 1}},
+      left: {style: "thin", color: {auto: 1}}
+    }
+  };
+  drawCell({t: 's', v: 'ИТОГО за выбранный период',
+    s: totalLineStyle}, ws, lineNum, COL_PROJ);
+  drawCell({t: 's', v: '', s: totalLineStyle}, ws, lineNum, COL_TASK);
+  drawCell({t: 'n', z: '0', v: allProjWorkFromCard, s: totalLineStyle}, ws, lineNum, COL_WORK_FROM_CARD);
+  drawCell({t: 'n', z: '0', v: data.totalTotal, s: totalLineStyle}, ws, lineNum, COL_WORK);
+  drawCell({t: 'n', z: '0', v: allProjPlannedWork, s: totalLineStyle}, ws, lineNum, COL_WORK_PLANNED);
+  if (allProjPlannedWork) {
+    drawCell({t: 'n', z: '0.00', v: data.totalTotal / allProjPlannedWork, s: totalLineStyle}, ws,
+      lineNum, COL_WORK_PLANNED_RATION);
+  }
+  else {
+    drawCell({t: 's', v: '', s: totalLineStyle}, ws, lineNum, COL_WORK_PLANNED_RATION);
+  }
+  // Draw work hours per employee
+  employees.forEach((empl, emplInd) => {
+    drawCell({t: 'n', z: '0', v: empl.totalWork || 0, s: totalLineStyle}, ws,
+      lineNum, employeeColStart + emplInd);
   });
 
   // Finalize the document (finalize ws)
