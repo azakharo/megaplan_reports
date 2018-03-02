@@ -65,20 +65,38 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   // Draw the data table's body
   const projects = data.projects;
   const employees = data.employees;
+  const projLineStyle = {
+    fill: {
+      patternType: "solid",
+      fgColor: {rgb: "FFFF75"} // Actually set's background
+    },
+    border: {
+      top: {style: "thin", color: {auto: 1}},
+      right: {style: "thin", color: {auto: 1}},
+      bottom: {style: "thin", color: {auto: 1}},
+      left: {style: "thin", color: {auto: 1}}
+    }
+  };
   projects.forEach(prj => {
     // Draw project line (totals)
     const projWorkFromCard = +prj.actual_work_with_sub_tasks;
     const projPlannedWork = +prj.planned_work;
-    drawCell({t: 's', v: prj.name}, ws, lineNum, COL_PROJ);
-    drawCell({t: 'n', z: '0', v: work2hours(projWorkFromCard)}, ws, lineNum, COL_WORK_FROM_CARD);
-    drawCell({t: 'n', z: '0', v: work2hours(prj.totalWork)}, ws, lineNum, COL_WORK);
-    drawCell({t: 'n', z: '0', v: work2hours(projPlannedWork)}, ws, lineNum, COL_WORK_PLANNED);
+    drawCell({t: 's', v: prj.name, s: projLineStyle}, ws, lineNum, COL_PROJ);
+    drawCell({t: 's', v: '', s: projLineStyle}, ws, lineNum, COL_TASK);
+    drawCell({t: 'n', z: '0', v: work2hours(projWorkFromCard), s: projLineStyle}, ws, lineNum, COL_WORK_FROM_CARD);
+    drawCell({t: 'n', z: '0', v: work2hours(prj.totalWork), s: projLineStyle}, ws, lineNum, COL_WORK);
+    drawCell({t: 'n', z: '0', v: work2hours(projPlannedWork), s: projLineStyle}, ws, lineNum, COL_WORK_PLANNED);
     if (projPlannedWork) {
-      drawCell({t: 'n', z: '0.00', v: prj.totalWork / projPlannedWork}, ws, lineNum, COL_WORK_PLANNED_RATION);
+      drawCell({t: 'n', z: '0.00', v: prj.totalWork / projPlannedWork, s: projLineStyle}, ws,
+        lineNum, COL_WORK_PLANNED_RATION);
+    }
+    else {
+      drawCell({t: 's', v: '', s: projLineStyle}, ws, lineNum, COL_WORK_PLANNED_RATION);
     }
     // Draw work hours per employee
     employees.forEach((empl, emplInd) => {
-      drawCell({t: 'n', z: '0', v: empl.proj2work[prj.id] || 0}, ws, lineNum, employeeColStart + emplInd);
+      drawCell({t: 'n', z: '0', v: empl.proj2work[prj.id] || 0, s: projLineStyle}, ws,
+        lineNum, employeeColStart + emplInd);
     });
     lineNum += 1;
 
