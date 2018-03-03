@@ -5,6 +5,7 @@
 const exit = process.exit;
 const fs = require('fs');
 const moment = require('moment');
+require('moment-precise-range-plugin/moment-precise-range');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const chalk = require('chalk');
@@ -15,6 +16,8 @@ const createXlsx = require('./create_xlsx');
 
 
 async function main() {
+  const scriptStartDt = moment();
+
   // Parse the cmd line options
   const INPUT_DATE_FRMT = 'DD.MM.YYYY';
   program
@@ -99,6 +102,10 @@ async function main() {
 
   // Write data to XLSX
   createXlsx(data, dtStart, dtEnd, outdir);
+
+  // Print script exec time
+  const scriptEndDt = moment();
+  log(`Exec time: ${moment.preciseDiff(scriptStartDt, scriptEndDt)}`);
 }
 
 // Start the program
