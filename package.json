@@ -2,9 +2,9 @@
   "name": "megaplan-reports",
   "version": "0.1.0",
   "description": "",
-  "main": "quart_report.js",
+  "main": "megaplan_report.js",
   "scripts": {
-    "start": "node quart_report.js",
+    "start": "node megaplan_report.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alexey Zakharov",
@@ -20,7 +20,7 @@
     "xlsx": "git+https://github.com/xSirrioNx/js-xlsx.git"
   },
   "bin": {
-    "quart_report": "./quart_report.js"
+    "megaplan_report": "./megaplan_report.js"
   },
   "preferGlobal": true
 }
