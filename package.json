@@ -1,7 +1,7 @@
 {
   "name": "megaplan-reports",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Generate XLSX report using data from Megaplan",
   "main": "megaplan_report.js",
   "scripts": {
     "start": "node megaplan_report.js",
@@ -23,5 +23,11 @@
     "megaplan_report": "./megaplan_report.js",
     "megaplan_config": "./megaplan_config.js"
   },
-  "preferGlobal": true
+  "preferGlobal": true,
+  "homepage": "https://github.com/azakharo/megaplan_reports",
+  "keywords": [
+    "megaplan",
+    "xls",
+    "xlsx"
+  ]
 }
