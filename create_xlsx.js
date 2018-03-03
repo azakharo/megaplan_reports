@@ -158,7 +158,9 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   ws['!ref'] += endOfWsRange;
 
   // Write report to file
-  XLSX.writeFile(wb, `${outdir}\\test.xlsx`);
+  const DATE_PRINT_FRMT = 'DD.MM.YYYY_HH.mm';
+  XLSX.writeFile(wb,
+    `${outdir}/megaplan_report_${dtStart.format(DATE_PRINT_FRMT)}-${dtEnd.format(DATE_PRINT_FRMT)}.xlsx`);
 };
 
 function drawCell(cell, ws, row, col) {

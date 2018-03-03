@@ -95,7 +95,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   });
 
   const totalTotal = reduce(projects, (total, proj) => (total + proj.totalWork), 0);
-  log(`The whole work: ${totalTotal}`);
+  log(`TOTAL work for the specified period: ${totalTotal} minutes OR ${(totalTotal / 60).toFixed(1)} hours`);
 
   return {
     employees,
