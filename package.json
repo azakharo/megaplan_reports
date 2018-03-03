@@ -20,7 +20,8 @@
     "xlsx": "git+https://github.com/xSirrioNx/js-xlsx.git"
   },
   "bin": {
-    "megaplan_report": "./megaplan_report.js"
+    "megaplan_report": "./megaplan_report.js",
+    "megaplan_config": "./megaplan_config.js"
   },
   "preferGlobal": true
 }
