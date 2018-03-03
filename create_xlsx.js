@@ -2,10 +2,12 @@
 
 const {concat, reduce} = require('lodash');
 const XLSX = require('xlsx');
+const chalk = require('chalk');
 const {getTimePeriodStr, log} = require('./utils');
 
 
 module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
+  log('Creating XLSX...');
   const SHEET_NAME = 'Лист 1';
   const wb = XLSX.utils.book_new();
 
@@ -159,8 +161,9 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
 
   // Write report to file
   const DATE_PRINT_FRMT = 'DD.MM.YYYY_HH.mm';
-  XLSX.writeFile(wb,
-    `${outdir}/megaplan_report_${dtStart.format(DATE_PRINT_FRMT)}-${dtEnd.format(DATE_PRINT_FRMT)}.xlsx`);
+  const xlsPath = `${outdir}/megaplan_report_${dtStart.format(DATE_PRINT_FRMT)}-${dtEnd.format(DATE_PRINT_FRMT)}.xlsx`
+  log(chalk.yellow(`Save report '${xlsPath}'`));
+  XLSX.writeFile(wb, xlsPath);
 };
 
 function drawCell(cell, ws, row, col) {

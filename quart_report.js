@@ -84,36 +84,17 @@ async function main() {
 
   const outdir = program.outdir || process.cwd();
 
-  let fileCont = null;
-  try {
-    fileCont = fs.readFileSync('D:\\Temp\\megaplan.json', 'utf8');
-  }
-  catch (e) {}
-
   let data = null;
-  if (!fileCont) {
-    // Login
-    const mpClient = await loginMegaplan(server, user, password);
+  // Login
+  const mpClient = await loginMegaplan(server, user, password);
 
-    // Get data from Megaplan
-    try {
-      data = await getReportData(mpClient, dtStart, dtEnd);
-    }
-    catch (e) {
-      log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
-      exit(3);
-    }
-
-    fs.writeFileSync('D:\\Temp\\megaplan.json', stringify(data) , 'utf-8');
+  // Get data from Megaplan
+  try {
+    data = await getReportData(mpClient, dtStart, dtEnd);
   }
-  else {
-    try {
-      data = JSON.parse(fileCont);
-    }
-    catch (e) {
-      logData(e);
-      exit(2);
-    }
+  catch (e) {
+    log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
+    exit(3);
   }
 
   // Write data to XLSX
