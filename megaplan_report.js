@@ -3,7 +3,6 @@
 'use strict';
 
 const exit = process.exit;
-const fs = require('fs');
 const moment = require('moment');
 require('moment-precise-range-plugin/moment-precise-range');
 const program = require('commander');
