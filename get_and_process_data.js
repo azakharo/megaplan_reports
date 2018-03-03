@@ -32,7 +32,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
 
   // Get comments per task
   log('Loading comments...');
-  for (const task of tasks) {
+  for (const [taskInd, task ] of tasks.entries()) {
     let allComments = null;
     try {
       allComments = await getComments(mpClient, task.id);
@@ -48,7 +48,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
       return c.work && (dt.isSameOrAfter(dtStart) && dt.isSameOrBefore(dtEnd));
     });
 
-    log(`'${task.name}' comments loaded ${allComments.length}, after filtering: ${commentsFiltered.length}`);
+    log(`task ${taskInd + 1}/${tasks.length}: loaded ${allComments.length} comments`);
 
     // Associate comments with task
     task.comments = commentsFiltered;
