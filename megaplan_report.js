@@ -97,6 +97,7 @@ async function main() {
       log(chalk.red(`Invalid time period END: ${program.end}`));
       exit(1);
     }
+    dtEnd = dtEnd.endOf('day');
   }
   else {
     const questions = [{
@@ -115,9 +116,9 @@ async function main() {
         log(chalk.red(`Invalid time period END: ${answers.end}`));
         exit(1);
       }
+      dtEnd = dtEnd.endOf('day');
     }
   }
-  dtEnd = dtEnd.endOf('day');
 
   // Validate time period
   if (dtStart.isSameOrAfter(dtEnd)) {
