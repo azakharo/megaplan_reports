@@ -12,10 +12,13 @@ const {log, stringify, getTimePeriodStr} = require('./utils');
 const {loginMegaplan} = require('./call_megaplan');
 const getReportData = require('./get_and_process_data');
 const createXlsx = require('./create_xlsx');
+const {loadConfig} = require('./config');
 
 
 async function main() {
   const scriptStartDt = moment();
+
+  const config = loadConfig();
 
   // Parse the cmd line options
   const INPUT_DATE_FRMT = 'DD.MM.YYYY';
@@ -29,13 +32,19 @@ async function main() {
     .option('-o, --outdir [outdir]', 'Directory to place the report into. If not specified, the current working directory is used.')
     .parse(process.argv);
 
-  const server = program.server;
+  let server = program.server;
+  if (!server) {
+    server = config.server;
+  }
   if (!server) {
     log(chalk.red('Please specify the server'));
     exit(1);
   }
 
-  const user = program.user;
+  let user = program.user;
+  if (!user) {
+    user = config.username;
+  }
   if (!user) {
     log(chalk.red('Please specify the username'));
     exit(1);
@@ -45,6 +54,9 @@ async function main() {
   log(chalk.yellow(`Username: ${user}`));
 
   let password = program.password;
+  if (!password) {
+    password = config.password;
+  }
   if (!password) {
     const questions = [{
       type: 'input',
