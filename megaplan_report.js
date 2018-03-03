@@ -16,8 +16,6 @@ const {loadConfig} = require('./config');
 
 
 async function main() {
-  const scriptStartDt = moment();
-
   const config = loadConfig();
 
   // Parse the cmd line options
@@ -140,6 +138,7 @@ async function main() {
 
   const outdir = program.outdir || process.cwd();
 
+  const scriptStartDt = moment();
   let data = null;
   // Login
   const mpClient = await loginMegaplan(server, user, password);
