@@ -29,5 +29,9 @@
     "megaplan",
     "xls",
     "xlsx"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/azakharo/megaplan_reports.git"
+  }
 }
