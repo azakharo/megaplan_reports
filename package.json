@@ -1,6 +1,6 @@
 {
   "name": "megaplan-reports",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Generate XLSX report using data from Megaplan",
   "main": "megaplan_report.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "megaplanjs": "1.0.1",
     "moment": "2.20.1",
     "moment-precise-range-plugin": "1.3.0",
-    "xlsx": "git+https://github.com/xSirrioNx/js-xlsx.git"
+    "xlsx": "https://github.com/xSirrioNx/js-xlsx/tarball/master"
   },
   "bin": {
     "megaplan_report": "./megaplan_report.js",
