@@ -1,5 +1,6 @@
 'use strict';
 
+const exit = process.exit;
 const {values, isEmpty} = require('lodash');
 const chalk = require('chalk');
 const megaplan = require('megaplanjs');
