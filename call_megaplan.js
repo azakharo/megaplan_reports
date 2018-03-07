@@ -10,6 +10,8 @@ const log = require('./utils').log;
 function loginMegaplan(server, username, password) {
   return new Promise(resolve => {
     extendMegaplanClient();
+    // Ignore self-signed ssl certificate in node.js with https.request
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     const mpClient = new megaplan.Client(server)
       .auth(username, password);
 
