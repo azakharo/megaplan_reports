@@ -141,7 +141,12 @@ async function main() {
   const scriptStartDt = moment();
   let data = null;
   // Login
-  const mpClient = await loginMegaplan(server, user, password);
+  const mpClient = await loginMegaplan(
+    {
+      hostname: server,
+      port: 80
+    },
+    user, password);
 
   // Get data from Megaplan
   try {
