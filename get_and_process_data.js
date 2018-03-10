@@ -44,7 +44,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
       return c.work && (dt.isSameOrAfter(dtStart) && dt.isSameOrBefore(dtEnd));
     });
 
-    log(`task ${taskInd + 1}/${tasks.length}: loaded ${allComments.length} comments`);
+    log(`task ${taskInd + 1}/${tasks.length}: loaded ${allComments.length} comments, after filtering ${commentsFiltered.length}`);
 
     // Associate comments with task
     task.comments = commentsFiltered;
