@@ -148,7 +148,7 @@ async function main() {
     data = await getReportData(mpClient, dtStart, dtEnd);
   }
   catch (e) {
-    log(chalk.red(`Could NOT get data from Megaplan: ${e}`));
+    log(chalk.red(`Could NOT get data from Megaplan: ${stringify(e)}`));
     exit(3);
   }
 
