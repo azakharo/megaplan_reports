@@ -2,6 +2,7 @@
 
 const {filter, reduce} = require('lodash');
 const moment = require('moment');
+const chalk = require('chalk');
 const {getEmployees, getProjects, getTasks, getComments} = require('./call_megaplan');
 const {log, stringify, logData} = require('./utils');
 
@@ -22,6 +23,13 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   // Filter tasks by start, end
   let tasks = filter(allTasks, task => filterTaskByStartEnd(task, dtStart, dtEnd));
   log(`Tasks after filtering by start/end time: ${tasks.length}`);
+  // Remove tasks which do not belong to particular project
+  const tasksBeforeProjFilter = tasks.length;
+  tasks = filter(tasks, task => task.project && task.project.id);
+  const tasksAfterProjFilter = tasks.length;
+  if (tasksBeforeProjFilter !== tasksAfterProjFilter) {
+    log(chalk.magenta(`Found ${tasksBeforeProjFilter - tasksAfterProjFilter} tasks wiout project. They are ignored.`));
+  }
 
   // Get comments per task
   log('Loading comments...');
@@ -63,7 +71,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
 
   log('Calculate work per project');
   projects.forEach(proj => {
-    proj.tasks = filter(tasks, t => t.project && (t.project.id === proj.id));
+    proj.tasks = filter(tasks, t => t.project.id === proj.id);
     proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), 0);
   });
 
