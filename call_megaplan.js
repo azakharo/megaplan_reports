@@ -111,9 +111,10 @@ async function getTasks(mpClient, updatedAfter) {
   return tasks;
 }
 
-function getComments(mpClient, taskID) {
+function getCommentsPage(mpClient, taskID, page, updatedAfter) {
+  const PAGE_SIZE = 50;
   return new Promise((resolve, reject) => {
-    mpClient.task_comments(taskID).send(
+    mpClient.task_comments_page(taskID, PAGE_SIZE, page, updatedAfter).send(
       data => {
         let comments = [];
         if (data && data.comments) {
@@ -124,6 +125,21 @@ function getComments(mpClient, taskID) {
       err => reject(err)
     );
   });
+}
+
+async function getComments(mpClient, taskID, updatedAfter) {
+  let comments = [];
+  let commentsOnPage = null;
+  let page = 0;
+  do {
+    commentsOnPage = await getCommentsPage(mpClient, taskID, page, updatedAfter);
+    if (commentsOnPage.length > 0) {
+      comments = comments.concat(commentsOnPage);
+    }
+    page += 1;
+  } while (commentsOnPage.length > 0);
+
+  return comments;
 }
 
 function getExtraFields(mpClient, taskID) {

@@ -23,30 +23,30 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   let tasks = filter(allTasks, task => filterTaskByStartEnd(task, dtStart, dtEnd));
   log(`Tasks after filtering by start/end time: ${tasks.length}`);
 
-  // // Get comments per task
-  // log('Loading comments...');
-  // for (const [taskInd, task ] of tasks.entries()) {
-  //   let allComments = null;
-  //   try {
-  //     allComments = await getComments(mpClient, task.id);
-  //   }
-  //   catch (e) {
-  //     log(chalk.red(stringify(e)));
-  //     exit(2);
-  //   }
-  //
-  //   // Filter comments
-  //   const commentsFiltered = filter(allComments, c => {
-  //     const dt = moment(c.time_created);
-  //     return c.work && (dt.isSameOrAfter(dtStart) && dt.isSameOrBefore(dtEnd));
-  //   });
-  //
-  //   log(`task ${taskInd + 1}/${tasks.length}: loaded ${allComments.length} comments, after filtering ${commentsFiltered.length}`);
-  //
-  //   // Associate comments with task
-  //   task.comments = commentsFiltered;
-  // }
-  //
+  // Get comments per task
+  log('Loading comments...');
+  for (const [taskInd, task ] of tasks.entries()) {
+    let allComments = null;
+    try {
+      allComments = await getComments(mpClient, task.id, dtStart);
+    }
+    catch (e) {
+      log(chalk.red(stringify(e)));
+      exit(2);
+    }
+
+    // Filter comments
+    const commentsFiltered = filter(allComments, c => {
+      const dt = moment(c.time_created);
+      return c.work && (dt.isSameOrAfter(dtStart) && dt.isSameOrBefore(dtEnd));
+    });
+
+    log(`task ${taskInd + 1}/${tasks.length}: loaded ${allComments.length} comments, after filtering ${commentsFiltered.length}`);
+
+    // Associate comments with task
+    task.comments = commentsFiltered;
+  }
+
   // // Remove tasks with no comments
   // const tasksBeforeCommentFilterCount = tasks.length;
   // tasks = filter(tasks, t => t.comments.length > 0);
