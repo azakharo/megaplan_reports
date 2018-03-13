@@ -47,55 +47,55 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
     task.comments = commentsFiltered;
   }
 
-  // // Remove tasks with no comments
-  // const tasksBeforeCommentFilterCount = tasks.length;
-  // tasks = filter(tasks, t => t.comments.length > 0);
-  // const tasksWithCommentsCount = tasks.length;
-  // if (tasksWithCommentsCount !== tasksBeforeCommentFilterCount) {
-  //   log(`Found ${tasksBeforeCommentFilterCount - tasksWithCommentsCount} tasks w/out comments. They are ignored.`);
-  //   log(`Tasks remaining after all the filtering: ${tasks.length}`);
-  // }
-  //
-  // log('Calculate work per task');
-  // for (const task of tasks) {
-  //   calcTaskWork(task);
-  // }
-  //
-  // log('Calculate work per project');
-  // projects.forEach(proj => {
-  //   proj.tasks = filter(tasks, t => t.project.id === proj.id);
-  //   proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), 0);
-  // });
-  //
-  // log('Calculate work per employee (total)');
-  // employees.forEach(empl => {
-  //   empl.totalWork = 0;
-  //   tasks.forEach(task => {
-  //     const taskWork = task.employee2work[empl.id];
-  //     if (taskWork) {
-  //       empl.totalWork += taskWork;
-  //     }
-  //   });
-  // });
-  //
-  // log('Calculate employee work per project');
-  // employees.forEach(empl => {
-  //   empl.proj2work = {};
-  //   projects.forEach(proj => {
-  //     empl.proj2work[proj.id] =
-  //       reduce(proj.tasks, (total, task) => (total + (task.employee2work[empl.id] || 0)), 0);
-  //   });
-  // });
-  //
-  // const totalTotal = reduce(projects, (total, proj) => (total + proj.totalWork), 0);
-  // log(`TOTAL work for the specified period: ${totalTotal} minutes OR ${(totalTotal / 60).toFixed(1)} hours`);
-  //
-  // return {
-  //   employees,
-  //   projects,
-  //   tasks,
-  //   totalTotal
-  // };
+  // Remove tasks with no comments
+  const tasksBeforeCommentFilterCount = tasks.length;
+  tasks = filter(tasks, t => t.comments.length > 0);
+  const tasksWithCommentsCount = tasks.length;
+  if (tasksWithCommentsCount !== tasksBeforeCommentFilterCount) {
+    log(`Found ${tasksBeforeCommentFilterCount - tasksWithCommentsCount} tasks w/out comments. They are ignored.`);
+    log(`Tasks remaining after all the filtering: ${tasks.length}`);
+  }
+
+  log('Calculate work per task');
+  for (const task of tasks) {
+    calcTaskWork(task);
+  }
+
+  log('Calculate work per project');
+  projects.forEach(proj => {
+    proj.tasks = filter(tasks, t => t.project && (t.project.id === proj.id));
+    proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), 0);
+  });
+
+  log('Calculate work per employee (total)');
+  employees.forEach(empl => {
+    empl.totalWork = 0;
+    tasks.forEach(task => {
+      const taskWork = task.employee2work[empl.id];
+      if (taskWork) {
+        empl.totalWork += taskWork;
+      }
+    });
+  });
+
+  log('Calculate employee work per project');
+  employees.forEach(empl => {
+    empl.proj2work = {};
+    projects.forEach(proj => {
+      empl.proj2work[proj.id] =
+        reduce(proj.tasks, (total, task) => (total + (task.employee2work[empl.id] || 0)), 0);
+    });
+  });
+
+  const totalTotal = reduce(projects, (total, proj) => (total + proj.totalWork), 0);
+  log(`TOTAL work for the specified period: ${totalTotal} minutes OR ${(totalTotal / 60).toFixed(1)} hours`);
+
+  return {
+    employees,
+    projects,
+    tasks,
+    totalTotal
+  };
 };
 
 function calcTaskWork(task) {

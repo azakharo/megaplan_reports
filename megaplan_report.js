@@ -157,7 +157,7 @@ async function main() {
   }
 
   // Write data to XLSX
-  // createXlsx(data, dtStart, dtEnd, outdir);
+  createXlsx(data, dtStart, dtEnd, outdir);
 
   // Print script exec time
   const scriptEndDt = moment();
