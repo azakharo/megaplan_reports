@@ -9,7 +9,6 @@ const log = require('./utils').log;
 
 function loginMegaplan(server, username, password) {
   return new Promise(resolve => {
-    extendMegaplanClient();
     // Ignore self-signed ssl certificate in node.js with https.request
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     const mpClient = new megaplan.Client(server)
@@ -87,16 +86,6 @@ function getComments(mpClient, taskID) {
       err => reject(err)
     );
   });
-}
-
-function extendMegaplanClient() {
-  megaplan.Client.prototype.task_extra_fields = function (task_id) {
-    return this.__request('::task/extFieldsMetadata.api', { id: task_id });
-  };
-  megaplan.Client.prototype.task_with_extra_fields = function (task_id, extra_fields) {
-    const fldNames = extra_fields.map(f => f.name);
-    return this.__request('::task/card.api', { id: task_id, extra_fields: fldNames });
-  };
 }
 
 function getExtraFields(mpClient, taskID) {

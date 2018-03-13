@@ -13,7 +13,7 @@ const {loginMegaplan} = require('./call_megaplan');
 const getReportData = require('./get_and_process_data');
 const createXlsx = require('./create_xlsx');
 const {loadConfig} = require('./config');
-
+const {extendMegaplanClient} = require('./extend_megaplanjs');
 
 async function main() {
   const config = loadConfig();
@@ -137,6 +137,8 @@ async function main() {
   log(chalk.yellow(`Time period: ${getTimePeriodStr(dtStart, dtEnd)}`));
 
   const outdir = program.outdir || process.cwd();
+
+  extendMegaplanClient();
 
   const scriptStartDt = moment();
   let data = null;
