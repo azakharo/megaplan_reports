@@ -138,10 +138,12 @@ async function main() {
 
   const outdir = program.outdir || process.cwd();
 
+  // Extend megaplanjs package with some helper methods
   extendMegaplanClient();
 
   const scriptStartDt = moment();
   let data = null;
+
   // Login
   const mpClient = await loginMegaplan(server, user, password);
 
