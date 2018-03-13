@@ -13,20 +13,18 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
   const allProjects = await getProjects(mpClient);
   log(`Loaded ${allProjects.length} projects`);
   const projects = allProjects;
-  logData(projects);
   // // Filter projects by start, end
   // const projects = filter(allProjects, prj => filterByStartEnd(prj, dtStart, dtEnd));
   // log(`Projects after filtering: ${projects.length}`);
 
-  // const allTasks = await getTasks(mpClient);
-  // log(`Loaded ${allTasks.length} tasks`);
-  // // TODO tasks detailed or not?
-  // // TODO request tasks with filter?
-  // let tasks = allTasks;
-  // // // Filter tasks by start, end
-  // // let tasks = filter(allTasks, task => filterByStartEnd(task, dtStart, dtEnd));
-  // // log(`Tasks after filtering by start/end time: ${tasks.length}`);
-  //
+  const allTasks = await getTasks(mpClient, dtStart);
+  log(`Loaded ${allTasks.length} tasks`);
+  // TODO tasks detailed or not?
+  // TODO request tasks with filter?
+  // Filter tasks by start, end
+  let tasks = filter(allTasks, task => filterTaskByStartEnd(task, dtStart, dtEnd));
+  log(`Tasks after filtering by start/end time: ${tasks.length}`);
+
   // // Get comments per task
   // log('Loading comments...');
   // for (const [taskInd, task ] of tasks.entries()) {
@@ -117,6 +115,6 @@ function calcTaskWork(task) {
   });
 }
 
-function filterByStartEnd(entity, start, end) {
-  return !(moment(entity.time_created).isSameOrAfter(end) || moment(entity.time_updated).isSameOrBefore(start));
+function filterTaskByStartEnd(task, start, end) {
+  return !(moment(task.time_created).isSameOrAfter(end) || moment(task.time_updated).isSameOrBefore(start));
 }

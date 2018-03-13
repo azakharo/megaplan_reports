@@ -74,10 +74,14 @@ async function getProjects(mpClient) {
   return projects;
 }
 
-
-function getTasks(mpClient) {
+function getTasksPage(mpClient, page, updatedAfter) {
+  const PAGE_SIZE = 50;
   return new Promise((resolve, reject) => {
-    mpClient.tasks({Detailed: true}).send(
+    const options = {Detailed: true, Limit: PAGE_SIZE, Offset: PAGE_SIZE * page};
+    if (updatedAfter) {
+      options.TimeUpdated = updatedAfter.toISOString();
+    }
+    mpClient.tasks(options).send(
       data => {
         let tasks = [];
         if (data) {
@@ -88,6 +92,21 @@ function getTasks(mpClient) {
       err => reject(err)
     );
   });
+}
+
+async function getTasks(mpClient, updatedAfter) {
+  let tasks = [];
+  let tasksOnPage = null;
+  let page = 0;
+  do {
+    tasksOnPage = await getTasksPage(mpClient, page, updatedAfter);
+    if (tasksOnPage.length > 0) {
+      tasks = tasks.concat(tasksOnPage);
+    }
+    page += 1;
+  } while (tasksOnPage.length > 0);
+
+  return tasks;
 }
 
 function getComments(mpClient, taskID) {
