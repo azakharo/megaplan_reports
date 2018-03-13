@@ -43,9 +43,10 @@ function getEmployees(mpClient) {
   });
 }
 
-function getProjects(mpClient) {
+function getProjectsPage(mpClient, page) {
+  const PAGE_SIZE = 50;
   return new Promise((resolve, reject) => {
-    mpClient.projects({Detailed: true}).send(
+    mpClient.projects({Detailed: true, Limit: PAGE_SIZE, Offset: PAGE_SIZE * page}).send(
       data => {
         let projects = [];
         if (!isEmpty(data) && data.projects) {
@@ -57,6 +58,22 @@ function getProjects(mpClient) {
     );
   });
 }
+
+async function getProjects(mpClient) {
+  let projects = [];
+  let projsOnPage = null;
+  let page = 0;
+  do {
+    projsOnPage = await getProjectsPage(mpClient, page);
+    if (projsOnPage.length > 0) {
+      projects = projects.concat(projsOnPage);
+    }
+    page += 1;
+  } while (projsOnPage.length > 0);
+
+  return projects;
+}
+
 
 function getTasks(mpClient) {
   return new Promise((resolve, reject) => {
