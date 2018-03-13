@@ -67,6 +67,7 @@ async function getProjects(mpClient) {
     projsOnPage = await getProjectsPage(mpClient, page);
     if (projsOnPage.length > 0) {
       projects = projects.concat(projsOnPage);
+      log(`Got next ${projsOnPage.length} projects. Total loaded: ${projects.length}`);
     }
     page += 1;
   } while (projsOnPage.length > 0);
@@ -102,6 +103,7 @@ async function getTasks(mpClient, updatedAfter) {
     tasksOnPage = await getTasksPage(mpClient, page, updatedAfter);
     if (tasksOnPage.length > 0) {
       tasks = tasks.concat(tasksOnPage);
+      log(`Got next ${tasksOnPage.length} tasks. Total loaded: ${tasks.length}`);
     }
     page += 1;
   } while (tasksOnPage.length > 0);
