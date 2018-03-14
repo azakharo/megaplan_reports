@@ -1,6 +1,6 @@
 'use strict';
 
-const {concat, reduce} = require('lodash');
+const {concat, reduce, filter} = require('lodash');
 const XLSX = require('xlsx');
 const chalk = require('chalk');
 const {getTimePeriodStr, log} = require('./utils');
@@ -10,6 +10,10 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   log('Creating XLSX...');
   const SHEET_NAME = 'Лист 1';
   const wb = XLSX.utils.book_new();
+
+  // Leave only employees who worked
+  const allEmployees = data.employees;
+  const employees = filter(allEmployees, e => e.totalWork > 0);
 
   // Document properties
   wb.Props = {
@@ -21,7 +25,7 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
 
   // Init variables
   let lineNum = 0;
-  const emplColProps = data.employees.map(e => ({title: e.name, width: 18}));
+  const emplColProps = employees.map(e => ({title: e.name, width: 18}));
   let colProps = [
     {title: 'Проект', width: 30},
     {title: `Задачи за ${getTimePeriodStr(dtStart, dtEnd)}`, width: 44},
@@ -66,7 +70,6 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
 
   // Draw the data table's body
   const projects = data.projects;
-  const employees = data.employees;
   const projLineStyle = {
     fill: {
       fgColor: {rgb: "FFFF75"} // Actually set's background
