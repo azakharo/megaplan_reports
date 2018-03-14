@@ -29,6 +29,7 @@ async function main() {
     .option('--start [start]', `Time period START in format '${INPUT_DATE_FRMT}'`)
     .option('--end [end]', `Time period END in format '${INPUT_DATE_FRMT}'`)
     .option('-o, --outdir [outdir]', 'Directory to place the report into. If not specified, the current working directory is used.')
+    .option('--projectFilterID [projectFilterID]', `Filter ID necessary for getting all projects`)
     .parse(process.argv);
 
   let server = program.server;
@@ -139,6 +140,15 @@ async function main() {
 
   const outdir = program.outdir || process.cwd();
 
+  let projectFilterID = program.projectFilterID;
+  if (!projectFilterID) {
+    projectFilterID = config.projectFilterID;
+  }
+  if (projectFilterID) {
+    projectFilterID = parseInt(projectFilterID, 10);
+  }
+
+
   // Extend megaplanjs package with some helper methods
   extendMegaplanClient();
 
@@ -159,7 +169,7 @@ async function main() {
 
     // Get data from Megaplan
     try {
-      data = await getReportData(mpClient, dtStart, dtEnd);
+      data = await getReportData(mpClient, dtStart, dtEnd, projectFilterID);
     }
     catch (e) {
       log(chalk.red(`Could NOT get data from Megaplan: ${stringify(e)}`));

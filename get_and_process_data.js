@@ -7,11 +7,11 @@ const {getEmployees, getProjects, getTasks, getComments} = require('./call_megap
 const {log, stringify, logData} = require('./utils');
 
 
-module.exports = async function getReportData(mpClient, dtStart, dtEnd) {
+module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectFilterID) {
   const employees = await getEmployees(mpClient);
   log(`Loaded ${employees.length} employees`);
 
-  const allProjects = await getProjects(mpClient);
+  const allProjects = await getProjects(mpClient, projectFilterID);
   log(`Loaded ${allProjects.length} projects`);
   const projects = allProjects;
   // // Filter projects by start, end

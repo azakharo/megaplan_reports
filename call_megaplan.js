@@ -43,10 +43,18 @@ function getEmployees(mpClient) {
   });
 }
 
-function getProjectsPage(mpClient, page) {
+function getProjectsPage(mpClient, page, filterID) {
   const PAGE_SIZE = 50;
   return new Promise((resolve, reject) => {
-    mpClient.projects({Detailed: true, Limit: PAGE_SIZE, Offset: PAGE_SIZE * page}).send(
+    const options = {
+      Detailed: true,
+      Limit: PAGE_SIZE,
+      Offset: PAGE_SIZE * page,
+    };
+    if (filterID) {
+      options.FilterId = filterID;
+    }
+    mpClient.projects(options).send(
       data => {
         let projects = [];
         if (!isEmpty(data) && data.projects) {
@@ -59,12 +67,12 @@ function getProjectsPage(mpClient, page) {
   });
 }
 
-async function getProjects(mpClient) {
+async function getProjects(mpClient, filterID) {
   let projects = [];
   let projsOnPage = null;
   let page = 0;
   do {
-    projsOnPage = await getProjectsPage(mpClient, page);
+    projsOnPage = await getProjectsPage(mpClient, page, filterID);
     if (projsOnPage.length > 0) {
       projects = projects.concat(projsOnPage);
       log(`Got next ${projsOnPage.length} projects. Total loaded: ${projects.length}`);

@@ -27,7 +27,13 @@ async function main() {
       name: 'password',
       message: 'Please enter password: ',
       default: config.password
-    }
+    },
+    {
+      type: 'integer',
+      name: 'projectFilterID',
+      message: 'Please project filter ID: ',
+      default: config.projectFilterID
+    },
   ];
 
   const answers = await prompt(questions);
