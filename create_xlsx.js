@@ -68,8 +68,11 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   });
   lineNum += 1;
 
+  // Leave only projects with real work during the specified period
+  const allProjects = data.projects;
+  const projects = filter(allProjects, p => p.totalWork > 0);
+
   // Draw the data table's body
-  const projects = data.projects;
   const projLineStyle = {
     fill: {
       fgColor: {rgb: "FFFF75"} // Actually set's background
