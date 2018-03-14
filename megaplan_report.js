@@ -3,12 +3,13 @@
 'use strict';
 
 const exit = process.exit;
+const fs = require('fs');
 const moment = require('moment');
 require('moment-precise-range-plugin/moment-precise-range');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const chalk = require('chalk');
-const {log, stringify, getTimePeriodStr} = require('./utils');
+const {log, stringify, getTimePeriodStr, logData} = require('./utils');
 const {loginMegaplan} = require('./call_megaplan');
 const getReportData = require('./get_and_process_data');
 const createXlsx = require('./create_xlsx');
@@ -144,16 +145,36 @@ async function main() {
   const scriptStartDt = moment();
   let data = null;
 
-  // Login
-  const mpClient = await loginMegaplan(server, user, password);
-
-  // Get data from Megaplan
+  let fileCont = null;
   try {
-    data = await getReportData(mpClient, dtStart, dtEnd);
+    fileCont = fs.readFileSync('C:\\NewTemp\\megaplan.json', 'utf8');
   }
   catch (e) {
-    log(chalk.red(`Could NOT get data from Megaplan: ${stringify(e)}`));
-    exit(3);
+  }
+
+  if (!fileCont) {
+    // Login
+    const mpClient = await loginMegaplan(server, user, password);
+
+    // Get data from Megaplan
+    try {
+      data = await getReportData(mpClient, dtStart, dtEnd);
+    }
+    catch (e) {
+      log(chalk.red(`Could NOT get data from Megaplan: ${stringify(e)}`));
+      exit(3);
+    }
+
+    fs.writeFileSync('C:\\NewTemp\\megaplan.json', stringify(data), 'utf8');
+  }
+  else {
+    try {
+      data = JSON.parse(fileCont);
+    }
+    catch (e) {
+      logData(e);
+      exit(2);
+    }
   }
 
   // Write data to XLSX
