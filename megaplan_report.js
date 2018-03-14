@@ -3,7 +3,7 @@
 'use strict';
 
 const exit = process.exit;
-const fs = require('fs');
+// const fs = require('fs');
 const moment = require('moment');
 require('moment-precise-range-plugin/moment-precise-range');
 const program = require('commander');
@@ -145,14 +145,15 @@ async function main() {
   const scriptStartDt = moment();
   let data = null;
 
-  let fileCont = null;
-  try {
-    fileCont = fs.readFileSync('C:\\NewTemp\\megaplan.json', 'utf8');
-  }
-  catch (e) {
-  }
+  // let fileCont = null;
+  // try {
+  //   fileCont = fs.readFileSync('C:\\NewTemp\\megaplan.json', 'utf8');
+  // }
+  // catch (e) {
+  // }
+  //
+  // if (!fileCont) {
 
-  if (!fileCont) {
     // Login
     const mpClient = await loginMegaplan(server, user, password);
 
@@ -165,17 +166,17 @@ async function main() {
       exit(3);
     }
 
-    fs.writeFileSync('C:\\NewTemp\\megaplan.json', stringify(data), 'utf8');
-  }
-  else {
-    try {
-      data = JSON.parse(fileCont);
-    }
-    catch (e) {
-      logData(e);
-      exit(2);
-    }
-  }
+  //   fs.writeFileSync('C:\\NewTemp\\megaplan.json', stringify(data), 'utf8');
+  // }
+  // else {
+  //   try {
+  //     data = JSON.parse(fileCont);
+  //   }
+  //   catch (e) {
+  //     logData(e);
+  //     exit(2);
+  //   }
+  // }
 
   // Write data to XLSX
   createXlsx(data, dtStart, dtEnd, outdir);
