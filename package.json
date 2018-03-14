@@ -1,6 +1,6 @@
 {
   "name": "megaplan-reports",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Generate XLSX report using data from Megaplan",
   "main": "megaplan_report.js",
   "scripts": {

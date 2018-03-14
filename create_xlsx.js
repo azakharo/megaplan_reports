@@ -27,9 +27,9 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
   let lineNum = 0;
   const emplColProps = employees.map(e => ({title: e.name, width: 18}));
   let colProps = [
-    {title: 'Проект', width: 30},
+    {title: 'Проект', width: 38},
     {title: `Задачи за ${getTimePeriodStr(dtStart, dtEnd)}`, width: 44},
-    {title: 'Затрач. время из карточки', width: 23},
+    {title: 'Суммарное затраченное время с начала проекта', width: 23},
     {title: 'Затраченное время', width: 17},
     {title: 'Запланированное время', width: 21},
     {title: 'Затрач/запланир.', width: 15}
@@ -94,7 +94,7 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
     drawCell({t: 'n', z: '0', v: work2hours(prj.totalWork), s: projLineStyle}, ws, lineNum, COL_WORK);
     drawCell({t: 'n', z: '0', v: work2hours(projPlannedWork), s: projLineStyle}, ws, lineNum, COL_WORK_PLANNED);
     if (projPlannedWork) {
-      drawCell({t: 'n', z: '0.00', v: prj.totalWork / projPlannedWork, s: projLineStyle}, ws,
+      drawCell({t: 'n', z: '0.00', v: projWorkFromCard / projPlannedWork, s: projLineStyle}, ws,
         lineNum, COL_WORK_PLANNED_RATION);
     }
     else {
@@ -116,7 +116,7 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
       drawCell({t: 'n', z: '0', v: work2hours(task.totalWork)}, ws, lineNum, COL_WORK);
       drawCell({t: 'n', z: '0', v: work2hours(taskPlannedWork)}, ws, lineNum, COL_WORK_PLANNED);
       if (taskPlannedWork) {
-        drawCell({t: 'n', z: '0.00', v: task.totalWork / taskPlannedWork}, ws, lineNum, COL_WORK_PLANNED_RATION);
+        drawCell({t: 'n', z: '0.00', v: taskWorkFromCard / taskPlannedWork}, ws, lineNum, COL_WORK_PLANNED_RATION);
       }
       // Draw work hours per employee
       employees.forEach((empl, emplInd) => {
