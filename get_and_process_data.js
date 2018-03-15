@@ -45,7 +45,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
     // Filter comments
     const commentsFiltered = filter(allComments, c => {
-      const dt = moment(c.work_date);
+      const dt = moment(c.work_date || c.time_created);
       return c.work && (dt.isSameOrAfter(dtStart) && dt.isSameOrBefore(dtEnd));
     });
 
