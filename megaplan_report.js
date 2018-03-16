@@ -173,8 +173,9 @@ async function main() {
     }
     catch (e) {
       log(chalk.red(`Could NOT get data from Megaplan: ${stringify(e)}`));
-      exit(3);
+      exit(2);
     }
+    log(chalk.green('Loaded data from Megaplan'));
 
   //   fs.writeFileSync('C:\\NewTemp\\megaplan.json', stringify(data), 'utf8');
   // }
@@ -190,11 +191,25 @@ async function main() {
 
   // Write data to XLSX
   // TODO handle the case when XLS file already exist and open in Excel
-  createXlsx(data, dtStart, dtEnd, outdir);
+  try {
+    createXlsx(data, dtStart, dtEnd, outdir);
+  }
+  catch (err) {
+    let errMsg;
+    if (err.syscall === "open" && err.code === "EBUSY") {
+      errMsg = `Не удалось сохранить отчёт в файл '${err.path}', т.к. данный файл уже существует и открыт в Excel или OpenOffice.`;
+    }
+    else {
+      errMsg = `Could NOT create XLS: ${stringify(err)}`;
+    }
+    log(chalk.red(errMsg));
+    exit(3);
+  }
 
   // Print script exec time
   const scriptEndDt = moment();
   log(`Exec time: ${moment.preciseDiff(scriptStartDt, scriptEndDt)}`);
+  log(chalk.green('OK'));
 }
 
 // Start the program

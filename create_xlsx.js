@@ -167,9 +167,9 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
 
   // Write report to file
   const DATE_PRINT_FRMT = 'DD.MM.YYYY_HH.mm';
-  const xlsPath = `${outdir}/megaplan_report_${dtStart.format(DATE_PRINT_FRMT)}-${dtEnd.format(DATE_PRINT_FRMT)}.xlsx`
-  log(chalk.yellow(`Save report '${xlsPath}'`));
+  const xlsPath = `${outdir}/megaplan_report_${dtStart.format(DATE_PRINT_FRMT)}-${dtEnd.format(DATE_PRINT_FRMT)}.xlsx`;
   XLSX.writeFile(wb, xlsPath);
+  log(chalk.green(`Saved report to '${xlsPath}'`));
 };
 
 function drawCell(cell, ws, row, col) {
