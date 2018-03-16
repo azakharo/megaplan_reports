@@ -23,12 +23,22 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   // Filter tasks by start, end
   let tasks = filter(allTasks, task => filterTaskByStartEnd(task, dtStart, dtEnd));
   log(`Tasks after filtering by start/end time: ${tasks.length}`);
-  // Remove tasks which do not belong to particular project
-  const tasksBeforeProjFilter = tasks.length;
-  tasks = filter(tasks, task => task.project && task.project.id);
-  const tasksAfterProjFilter = tasks.length;
-  if (tasksBeforeProjFilter !== tasksAfterProjFilter) {
-    log(chalk.magenta(`Found ${tasksBeforeProjFilter - tasksAfterProjFilter} tasks wiout project. They are ignored.`));
+
+  // Find tasks which do not belong to particular project.
+  // Add dummy project and put the found tasks into it
+  const tasksWoutProj = filter(tasks, task => !task.project);
+  if (tasksWoutProj.length > 0) {
+    log(`Found ${tasksWoutProj.length} tasks wiout project.`);
+
+    const dummyProject = {
+      id: -1,
+      name: 'Задачи без проекта'
+    };
+    projects.push(dummyProject);
+
+    tasksWoutProj.forEach(t => {
+      t.project = dummyProject;
+    });
   }
 
   // Get comments per task
