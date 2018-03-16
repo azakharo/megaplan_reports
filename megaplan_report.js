@@ -189,6 +189,7 @@ async function main() {
   // }
 
   // Write data to XLSX
+  // TODO handle the case when XLS file already exist and open in Excel
   createXlsx(data, dtStart, dtEnd, outdir);
 
   // Print script exec time
