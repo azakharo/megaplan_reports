@@ -175,7 +175,7 @@ async function main() {
       log(chalk.red(`Could NOT get data from Megaplan: ${stringify(e)}`));
       exit(2);
     }
-    log(chalk.green('Loaded data from Megaplan'));
+    log(chalk.green('Prepared data for report'));
 
   //   fs.writeFileSync('C:\\NewTemp\\megaplan.json', stringify(data), 'utf8');
   // }

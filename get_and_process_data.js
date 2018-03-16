@@ -65,6 +65,8 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     task.comments = commentsFiltered;
   }
 
+  log(chalk.green('Loaded data from Megaplan'));
+
   // Remove tasks with no comments
   const tasksBeforeCommentFilterCount = tasks.length;
   tasks = filter(tasks, t => t.comments.length > 0);
