@@ -100,12 +100,9 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   }
 
   log('Calculate work per project');
-  projects.forEach(proj => {
-    // TODO calc proj work by proj comments and add it to the totalWork
-    // TODO associate work with employee. Iml calcProjWork func
-    proj.tasks = filter(tasks, t => t.project.id === proj.id);
-    proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), 0);
-  });
+  for (const proj of projects) {
+    calcProjectWork(proj, tasks);
+  }
 
   log('Calculate work per employee (total)');
   employees.forEach(empl => {
@@ -153,6 +150,24 @@ function calcTaskWork(task) {
 
     task.totalWork += work;
   });
+}
+
+function calcProjectWork(proj) {
+  proj.employee2projCommentWork = {};
+  proj.totalProjCommentWork = 0;
+
+  proj.comments.forEach(comment => {
+    const empID = comment.author.id;
+    const work = comment.work;
+
+    const prevWork = proj.employee2projCommentWork[empID] || 0;
+    proj.employee2projCommentWork[empID] = prevWork + work;
+
+    proj.totalProjCommentWork += work;
+  });
+
+  proj.tasks = filter(tasks, t => t.project.id === proj.id);
+  proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), proj.totalProjCommentWork);
 }
 
 function filterTaskByStartEnd(task, start, end) {
