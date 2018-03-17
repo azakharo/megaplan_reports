@@ -119,10 +119,10 @@ async function getTasks(mpClient, updatedAfter) {
   return tasks;
 }
 
-function getCommentsPage(mpClient, taskID, page, updatedAfter) {
+function getCommentsPage(mpClient, subject, entityID, page, updatedAfter) {
   const PAGE_SIZE = 50;
   return new Promise((resolve, reject) => {
-    mpClient.task_comments_page(taskID, PAGE_SIZE, page, updatedAfter).send(
+    mpClient.comments_page(subject, entityID, PAGE_SIZE, page, updatedAfter).send(
       data => {
         let comments = [];
         if (data && data.comments) {
@@ -135,12 +135,12 @@ function getCommentsPage(mpClient, taskID, page, updatedAfter) {
   });
 }
 
-async function getComments(mpClient, taskID, updatedAfter) {
+async function getComments(mpClient, subject, entityID, updatedAfter) {
   let comments = [];
   let commentsOnPage = null;
   let page = 0;
   do {
-    commentsOnPage = await getCommentsPage(mpClient, taskID, page, updatedAfter);
+    commentsOnPage = await getCommentsPage(mpClient, subject, entityID, page, updatedAfter);
     if (commentsOnPage.length > 0) {
       comments = comments.concat(commentsOnPage);
     }
@@ -148,6 +148,14 @@ async function getComments(mpClient, taskID, updatedAfter) {
   } while (commentsOnPage.length > 0);
 
   return comments;
+}
+
+async function getTaskComments(mpClient, taskID, updatedAfter) {
+  return getComments(mpClient, 'task', taskID, updatedAfter);
+}
+
+async function getProjectComments(mpClient, projID, updatedAfter) {
+  return getComments(mpClient, 'project', projID, updatedAfter);
 }
 
 function getExtraFields(mpClient, taskID) {
@@ -182,7 +190,8 @@ module.exports = {
   getEmployees,
   getProjects,
   getTasks,
-  getComments,
+  getTaskComments,
+  getProjectComments,
   getExtraFields,
   getTaskWithExtraFields
 };

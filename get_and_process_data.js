@@ -3,7 +3,7 @@
 const {filter, reduce} = require('lodash');
 const moment = require('moment');
 const chalk = require('chalk');
-const {getEmployees, getProjects, getTasks, getComments} = require('./call_megaplan');
+const {getEmployees, getProjects, getTasks, getTaskComments, getProjectComments} = require('./call_megaplan');
 const {log, stringify, logData} = require('./utils');
 
 
@@ -17,6 +17,27 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   // // Filter projects by start, end
   // const projects = filter(allProjects, prj => filterByStartEnd(prj, dtStart, dtEnd));
   // log(`Projects after filtering: ${projects.length}`);
+
+  // Get comments per projects
+  log('Loading project comments...');
+  for (const [projInd, proj ] of projects.entries()) {
+    let allComments = null;
+    try {
+      allComments = await getProjectComments(mpClient, proj.id, dtStart);
+    }
+    catch (e) {
+      log(chalk.red(stringify(e)));
+      exit(2);
+    }
+
+    // Filter comments
+    const commentsFiltered = filter(allComments, getCommentFilter(dtStart, dtEnd));
+
+    log(`project ${projInd + 1}/${projects.length}: loaded ${allComments.length} comments, after filtering ${commentsFiltered.length}`);
+
+    // Associate comments with proj
+    proj.comments = commentsFiltered;
+  }
 
   const allTasks = await getTasks(mpClient, dtStart);
   log(`Loaded ${allTasks.length} tasks`);
@@ -42,11 +63,11 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   }
 
   // Get comments per task
-  log('Loading comments...');
+  log('Loading task comments...');
   for (const [taskInd, task ] of tasks.entries()) {
     let allComments = null;
     try {
-      allComments = await getComments(mpClient, task.id, dtStart);
+      allComments = await getTaskComments(mpClient, task.id, dtStart);
     }
     catch (e) {
       log(chalk.red(stringify(e)));
@@ -54,10 +75,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     }
 
     // Filter comments
-    const commentsFiltered = filter(allComments, c => {
-      const dt = moment(c.work_date || c.time_created);
-      return c.work && (dt.isSameOrAfter(dtStart) && dt.isSameOrBefore(dtEnd));
-    });
+    const commentsFiltered = filter(allComments, getCommentFilter(dtStart, dtEnd));
 
     log(`task ${taskInd + 1}/${tasks.length}: loaded ${allComments.length} comments, after filtering ${commentsFiltered.length}`);
 
@@ -83,6 +101,8 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   log('Calculate work per project');
   projects.forEach(proj => {
+    // TODO calc proj work by proj comments and add it to the totalWork
+    // TODO associate work with employee. Iml calcProjWork func
     proj.tasks = filter(tasks, t => t.project.id === proj.id);
     proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), 0);
   });
@@ -96,12 +116,14 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
         empl.totalWork += taskWork;
       }
     });
+    // TODO add project comment work
   });
 
   log('Calculate employee work per project');
   employees.forEach(empl => {
     empl.proj2work = {};
     projects.forEach(proj => {
+      // TODO add project comment work
       empl.proj2work[proj.id] =
         reduce(proj.tasks, (total, task) => (total + (task.employee2work[empl.id] || 0)), 0);
     });
@@ -136,3 +158,8 @@ function calcTaskWork(task) {
 function filterTaskByStartEnd(task, start, end) {
   return !(moment(task.time_created).isSameOrAfter(end) || moment(task.time_updated).isSameOrBefore(start));
 }
+
+const getCommentFilter = (dtStart, dtEnd) => (comment) => {
+  const dt = moment(comment.work_date || comment.time_created);
+  return comment.work && (dt.isSameOrAfter(dtStart) && dt.isSameOrBefore(dtEnd));
+};
