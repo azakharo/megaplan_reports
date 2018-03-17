@@ -105,16 +105,9 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   }
 
   log('Calculate work per employee (total)');
-  employees.forEach(empl => {
-    empl.totalWork = 0;
-    tasks.forEach(task => {
-      const taskWork = task.employee2work[empl.id];
-      if (taskWork) {
-        empl.totalWork += taskWork;
-      }
-    });
-    // TODO add project comment work
-  });
+  for (const empl of employees) {
+    calcEmployeeWork(empl, projects, tasks);
+  }
 
   log('Calculate employee work per project');
   employees.forEach(empl => {
@@ -136,6 +129,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     totalTotal
   };
 };
+
 
 function calcTaskWork(task) {
   task.employee2work = {};
@@ -169,6 +163,27 @@ function calcProjectWork(proj) {
   proj.tasks = filter(tasks, t => t.project.id === proj.id);
   proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), proj.totalProjCommentWork);
 }
+
+function calcEmployeeWork(empl, projects, tasks) {
+  empl.totalWork = 0;
+
+  // Add work made by task comments
+  tasks.forEach(task => {
+    const taskWork = task.employee2work[empl.id];
+    if (taskWork) {
+      empl.totalWork += taskWork;
+    }
+  });
+
+  // Add work made by project comments
+  projects.forEach(proj => {
+    const work = proj.employee2projCommentWork[empl.id];
+    if (work) {
+      empl.totalWork += work;
+    }
+  });
+}
+
 
 function filterTaskByStartEnd(task, start, end) {
   return !(moment(task.time_created).isSameOrAfter(end) || moment(task.time_updated).isSameOrBefore(start));
