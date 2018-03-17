@@ -113,9 +113,10 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   employees.forEach(empl => {
     empl.proj2work = {};
     projects.forEach(proj => {
-      // TODO add project comment work
+      const projCommentWork = proj.employee2projCommentWork[empl.id] || 0;
+
       empl.proj2work[proj.id] =
-        reduce(proj.tasks, (total, task) => (total + (task.employee2work[empl.id] || 0)), 0);
+        reduce(proj.tasks, (total, task) => (total + (task.employee2work[empl.id] || 0)), projCommentWork);
     });
   });
 
