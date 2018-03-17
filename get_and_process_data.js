@@ -53,7 +53,8 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
     const dummyProject = {
       id: -1,
-      name: 'Задачи без проекта'
+      name: 'Задачи без проекта',
+      comments: []
     };
     projects.push(dummyProject);
 
@@ -147,7 +148,7 @@ function calcTaskWork(task) {
   });
 }
 
-function calcProjectWork(proj) {
+function calcProjectWork(proj, tasks) {
   proj.employee2projCommentWork = {};
   proj.totalProjCommentWork = 0;
 
