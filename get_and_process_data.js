@@ -3,7 +3,8 @@
 const {filter, reduce} = require('lodash');
 const moment = require('moment');
 const chalk = require('chalk');
-const {getEmployees, getProjects, getTasks, getTaskComments, getProjectComments} = require('./call_megaplan');
+const {getEmployees, getProjects, getTasks, getTaskComments, getProjectComments,
+  getExtraFields} = require('./call_megaplan');
 const {log, stringify, logData} = require('./utils');
 
 
@@ -44,6 +45,23 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   // Filter tasks by start, end
   let tasks = filter(allTasks, task => filterTaskByStartEnd(task, dtStart, dtEnd));
   log(`Tasks after filtering by start/end time: ${tasks.length}`);
+
+  // Get task extra field names
+  let taskExtraFields = [];
+  for (const task of tasks) {
+    const extraFields = await getExtraFields(mpClient, task.id);
+    if (Array.isArray(extraFields) && extraFields.length > 0) {
+      taskExtraFields = extraFields;
+      const fieldDispNames = extraFields.map(f => f.translation);
+      log(`Found task extra fields: ${fieldDispNames.join(', ')}`);
+      break;
+    }
+  }
+  if (taskExtraFields && taskExtraFields.length === 0) {
+    log(chalk.red('could not find task extra fields'));
+  }
+
+  // TODO For each task get core hours spent and planned.
 
   // Find tasks which do not belong to particular project.
   // Add dummy project and put the found tasks into it
@@ -87,6 +105,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   log(chalk.green('Loaded data from Megaplan'));
 
   // Remove tasks with no comments
+  // TODO do not remove tasks with core hours
   const tasksBeforeCommentFilterCount = tasks.length;
   tasks = filter(tasks, t => t.comments.length > 0);
   const tasksWithCommentsCount = tasks.length;
@@ -123,6 +142,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   const totalTotal = reduce(projects, (total, proj) => (total + proj.totalWork), 0);
   log(`TOTAL work for the specified period: ${totalTotal} minutes OR ${(totalTotal / 60).toFixed(1)} hours`);
+  // TODO calc total core hours
 
   return {
     employees,
@@ -149,6 +169,7 @@ function calcTaskWork(task) {
 }
 
 function calcProjectWork(proj, tasks) {
+  // TODO calc project core hours totals
   proj.employee2projCommentWork = {};
   proj.totalProjCommentWork = 0;
 
