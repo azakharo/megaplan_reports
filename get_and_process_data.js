@@ -192,7 +192,9 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     projects,
     tasks,
     totalTotal,
-    totalCoreHours
+    totalCoreHours,
+    fldCoreHoursSpent,
+    fldCoreHoursPlanned
   };
 };
 
