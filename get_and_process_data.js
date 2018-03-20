@@ -1,6 +1,6 @@
 'use strict';
 
-const {filter, reduce, find} = require('lodash');
+const {filter, reduce} = require('lodash');
 const moment = require('moment');
 const chalk = require('chalk');
 const megaplanjs_utils = require('megaplanjs/lib/utils');
@@ -56,28 +56,30 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     if (Array.isArray(extraFields) && extraFields.length > 0) {
       taskExtraFields = extraFields;
 
+      const fieldDispNames = extraFields.map(f => f.translation);
+      log(`Found task extra fields: ${fieldDispNames.join(', ')}`);
+
+      const CORE = 'ядро';
+      log(`Filter out fields which do not contain '${CORE}'`);
+      taskExtraFields = filter(taskExtraFields, f => f.translation.toLowerCase().indexOf(CORE) !== -1);
+      if (taskExtraFields.length === 2) {
+        fldCoreHoursSpent = taskExtraFields[0];
+        fldCoreHoursPlanned = taskExtraFields[1];
+      }
+
       for (const fld of taskExtraFields) {
         fld.fieldNameInTask = megaplanjs_utils.toUnderscore(fld.name);
       }
 
-      const fieldDispNames = extraFields.map(f => f.translation);
-      log(`Found task extra fields: ${fieldDispNames.join(', ')}`);
-
-
-      const CORE = 'ядро';
-
-      fldCoreHoursSpent = find(taskExtraFields, f => f.translation.toLowerCase().indexOf(CORE) !== -1);
       if (fldCoreHoursSpent) {
-        log(`Found core hours spent field name: ${fldCoreHoursSpent.translation}`);
+        log(`Found core hours spent field name: '${fldCoreHoursSpent.translation}'`);
       }
       else {
         log(chalk.red('Could not find core hours spent field name'));
       }
 
-      fldCoreHoursPlanned = find(taskExtraFields, f => f !== fldCoreHoursSpent &&
-        f.translation.toLowerCase().indexOf(CORE) !== -1);
       if (fldCoreHoursPlanned) {
-        log(`Found core hours planned field name: ${fldCoreHoursPlanned.translation}`);
+        log(`Found core hours planned field name: '${fldCoreHoursPlanned.translation}'`);
       }
       else {
         log(chalk.red('Could not find core hours planned field name'));
@@ -97,7 +99,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
       const taskWithExtraFlds = await getTaskWithExtraFields(mpClient, task.id, taskExtraFields);
       for (const fld of taskExtraFields) {
         const fldName = fld.fieldNameInTask;
-        task[fldName] = taskWithExtraFlds[fldName];
+        task[fldName] = +taskWithExtraFlds[fldName];
       }
     }
   }
@@ -143,10 +145,9 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   log(chalk.green('Loaded data from Megaplan'));
 
-  // Remove tasks with no comments
-  // TODO do not remove tasks with core hours
+  // Remove tasks if no comments or no spent core hours
   const tasksBeforeCommentFilterCount = tasks.length;
-  tasks = filter(tasks, t => t.comments.length > 0);
+  tasks = filter(tasks, t => t.comments.length > 0 || (fldCoreHoursSpent && t[fldCoreHoursSpent.fieldNameInTask]));
   const tasksWithCommentsCount = tasks.length;
   if (tasksWithCommentsCount !== tasksBeforeCommentFilterCount) {
     log(`Found ${tasksBeforeCommentFilterCount - tasksWithCommentsCount} tasks w/out comments. They are ignored.`);
@@ -160,7 +161,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   log('Calculate work per project');
   for (const proj of projects) {
-    calcProjectWork(proj, tasks);
+    calcProjectWork(proj, tasks, fldCoreHoursSpent);
   }
 
   log('Calculate work per employee (total)');
@@ -181,13 +182,17 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   const totalTotal = reduce(projects, (total, proj) => (total + proj.totalWork), 0);
   log(`TOTAL work for the specified period: ${totalTotal} minutes OR ${(totalTotal / 60).toFixed(1)} hours`);
-  // TODO calc total core hours
+
+  // Calc total core hours
+  const totalCoreHours = reduce(projects, (total, proj) => (total + proj.totalCoreHours), 0);
+  log(`TOTAL core hours for the specified period: ${totalCoreHours}`);
 
   return {
     employees,
     projects,
     tasks,
-    totalTotal
+    totalTotal,
+    totalCoreHours
   };
 };
 
@@ -207,8 +212,7 @@ function calcTaskWork(task) {
   });
 }
 
-function calcProjectWork(proj, tasks) {
-  // TODO calc project core hours totals
+function calcProjectWork(proj, tasks, fldCoreHoursSpent) {
   proj.employee2projCommentWork = {};
   proj.totalProjCommentWork = 0;
 
@@ -224,6 +228,9 @@ function calcProjectWork(proj, tasks) {
 
   proj.tasks = filter(tasks, t => t.project.id === proj.id);
   proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), proj.totalProjCommentWork);
+  if (fldCoreHoursSpent) {
+    proj.totalCoreHours = reduce(proj.tasks, (total, task) => (total + task[fldCoreHoursSpent.fieldNameInTask]), 0);
+  }
 }
 
 function calcEmployeeWork(empl, projects, tasks) {
