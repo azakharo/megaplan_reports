@@ -3,8 +3,9 @@
 const {filter, reduce} = require('lodash');
 const moment = require('moment');
 const chalk = require('chalk');
+const megaplanjs_utils = require('megaplanjs/lib/utils');
 const {getEmployees, getProjects, getTasks, getTaskComments, getProjectComments,
-  getExtraFields} = require('./call_megaplan');
+  getExtraFields, getTaskWithExtraFields} = require('./call_megaplan');
 const {log, stringify, logData} = require('./utils');
 
 
@@ -52,6 +53,11 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     const extraFields = await getExtraFields(mpClient, task.id);
     if (Array.isArray(extraFields) && extraFields.length > 0) {
       taskExtraFields = extraFields;
+
+      for (const fld of taskExtraFields) {
+        fld.fieldNameInTask = megaplanjs_utils.toUnderscore(fld.name);
+      }
+
       const fieldDispNames = extraFields.map(f => f.translation);
       log(`Found task extra fields: ${fieldDispNames.join(', ')}`);
       break;
@@ -61,7 +67,16 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     log(chalk.red('could not find task extra fields'));
   }
 
-  // TODO For each task get core hours spent and planned.
+  // For each task get core hours spent and planned
+  if (taskExtraFields.length > 0) {
+    for (const task of tasks) {
+      const taskWithExtraFlds = await getTaskWithExtraFields(mpClient, task.id, taskExtraFields);
+      for (const fld of taskExtraFields) {
+        const fldName = fld.fieldNameInTask;
+        task[fldName] = taskWithExtraFlds[fldName];
+      }
+    }
+  }
 
   // Find tasks which do not belong to particular project.
   // Add dummy project and put the found tasks into it
