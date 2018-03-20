@@ -69,6 +69,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   // For each task get core hours spent and planned
   if (taskExtraFields.length > 0) {
+    log('Loading task extra fields...');
     for (const task of tasks) {
       const taskWithExtraFlds = await getTaskWithExtraFields(mpClient, task.id, taskExtraFields);
       for (const fld of taskExtraFields) {
