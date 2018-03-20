@@ -1,6 +1,6 @@
 'use strict';
 
-const {filter, reduce} = require('lodash');
+const {filter, reduce, find} = require('lodash');
 const moment = require('moment');
 const chalk = require('chalk');
 const megaplanjs_utils = require('megaplanjs/lib/utils');
@@ -49,6 +49,8 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   // Get task extra field names
   let taskExtraFields = [];
+  let fldCoreHoursSpent = null;
+  let fldCoreHoursPlanned = null;
   for (const task of tasks) {
     const extraFields = await getExtraFields(mpClient, task.id);
     if (Array.isArray(extraFields) && extraFields.length > 0) {
@@ -60,6 +62,27 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
       const fieldDispNames = extraFields.map(f => f.translation);
       log(`Found task extra fields: ${fieldDispNames.join(', ')}`);
+
+
+      const CORE = 'ядро';
+
+      fldCoreHoursSpent = find(taskExtraFields, f => f.translation.toLowerCase().indexOf(CORE) !== -1);
+      if (fldCoreHoursSpent) {
+        log(`Found core hours spent field name: ${fldCoreHoursSpent.translation}`);
+      }
+      else {
+        log(chalk.red('Could not find core hours spent field name'));
+      }
+
+      fldCoreHoursPlanned = find(taskExtraFields, f => f !== fldCoreHoursSpent &&
+        f.translation.toLowerCase().indexOf(CORE) !== -1);
+      if (fldCoreHoursPlanned) {
+        log(`Found core hours planned field name: ${fldCoreHoursPlanned.translation}`);
+      }
+      else {
+        log(chalk.red('Could not find core hours planned field name'));
+      }
+
       break;
     }
   }
