@@ -44,7 +44,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   const allTasks = await getTasks(mpClient);
   log(`Loaded ${allTasks.length} tasks`);
   // Filter tasks by start, end
-  let tasks = filter(allTasks, task => filterTaskByEnd(task, dtEnd));
+  let tasks = filter(allTasks, task => filterTaskByCreateTime(task, dtEnd));
   log(`Tasks after filtering by start/end time: ${tasks.length}`);
 
   // Get task extra field names
@@ -256,8 +256,8 @@ function calcEmployeeWork(empl, projects, tasks) {
 }
 
 
-function filterTaskByEnd(task, end) {
-  return !moment(task.time_created).isSameOrAfter(end);
+function filterTaskByCreateTime(task, timePeriodEnd) {
+  return moment(task.time_created).isBefore(timePeriodEnd);
 }
 
 const getCommentFilter = (dtStart, dtEnd) => (comment) => {
