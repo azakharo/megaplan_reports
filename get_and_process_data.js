@@ -43,9 +43,10 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   const allTasks = await getTasks(mpClient);
   log(`Loaded ${allTasks.length} tasks`);
-  // Filter tasks by start, end
-  let tasks = filter(allTasks, task => filterTaskByCreateTime(task, dtEnd));
-  log(`Tasks after filtering by start/end time: ${tasks.length}`);
+  // Filter tasks
+  // let tasks = filter(allTasks, task => filterTaskByCreateTime(task, dtEnd));
+  // log(`Tasks after filtering by start/end time: ${tasks.length}`);
+  let tasks = allTasks;
 
   // Get task extra field names
   let taskExtraFields = [];
