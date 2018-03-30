@@ -3,7 +3,7 @@
 'use strict';
 
 const exit = process.exit;
-const fs = require('fs');
+// const fs = require('fs');
 const moment = require('moment');
 require('moment-precise-range-plugin/moment-precise-range');
 const program = require('commander');
@@ -177,7 +177,7 @@ async function main() {
     }
     log(chalk.green('Prepared data for report'));
 
-    fs.writeFileSync('C:\\megaplan.json', stringify(data), 'utf8');
+    // fs.writeFileSync('C:\\megaplan.json', stringify(data), 'utf8');
   // }
   // else {
   //   try {
