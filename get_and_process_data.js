@@ -41,7 +41,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     proj.comments = commentsFiltered;
   }
 
-  const allTasks = await getTasks(mpClient);
+  const allTasks = await getTasks(mpClient, dtStart.subtract(2, 'months'));
   log(`Loaded ${allTasks.length} tasks`);
   // Filter tasks by start, end
   let tasks = filter(allTasks, task => filterTaskByEnd(task, dtEnd));
