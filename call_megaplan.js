@@ -38,14 +38,17 @@ function getEmployees(mpClient) {
         }
         resolve(employees);
       },
-      err => reject(err)
+      err => {
+        log(chalk.red('Could NOT get employees'));
+        reject(err);
+      }
     );
   });
 }
 
 function getProjectsPage(mpClient, page, filterID) {
   const PAGE_SIZE = 50;
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     const options = {
       Detailed: true,
       Limit: PAGE_SIZE,
@@ -62,7 +65,13 @@ function getProjectsPage(mpClient, page, filterID) {
         }
         resolve(projects);
       },
-      err => reject(err)
+      () => {
+        wait().then(() => {
+          getProjectsPage(mpClient, page, filterID).then(
+            projects => resolve(projects)
+          );
+        });
+      }
     );
   });
 }
@@ -85,7 +94,7 @@ async function getProjects(mpClient, filterID) {
 
 function getTasksPage(mpClient, page, updatedAfter) {
   const PAGE_SIZE = 50;
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     const options = {Detailed: true, Limit: PAGE_SIZE, Offset: PAGE_SIZE * page};
     if (updatedAfter) {
       options.TimeUpdated = updatedAfter.toISOString();
@@ -98,7 +107,13 @@ function getTasksPage(mpClient, page, updatedAfter) {
         }
         resolve(tasks);
       },
-      err => reject(err)
+      () => {
+        wait().then(() => {
+          getTasksPage(mpClient, page, updatedAfter).then(
+            tasks => resolve(tasks)
+          );
+        });
+      }
     );
   });
 }
@@ -121,7 +136,7 @@ async function getTasks(mpClient, updatedAfter) {
 
 function getCommentsPage(mpClient, subject, entityID, page, updatedAfter) {
   const PAGE_SIZE = 50;
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     mpClient.comments_page(subject, entityID, PAGE_SIZE, page, updatedAfter).send(
       data => {
         let comments = [];
@@ -130,7 +145,13 @@ function getCommentsPage(mpClient, subject, entityID, page, updatedAfter) {
         }
         resolve(comments);
       },
-      err => reject(err)
+      () => {
+        wait().then(() => {
+          getCommentsPage(mpClient, subject, entityID, page, updatedAfter).then(
+            comments => resolve(comments)
+          );
+        });
+      }
     );
   });
 }
@@ -159,7 +180,7 @@ async function getProjectComments(mpClient, projID, updatedAfter) {
 }
 
 function getExtraFields(mpClient, taskID) {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     mpClient.task_extra_fields(taskID).send(
       data => {
         let extraFlds = [];
@@ -168,19 +189,40 @@ function getExtraFields(mpClient, taskID) {
         }
         resolve(extraFlds);
       },
-      err => reject(err)
+      () => {
+        wait().then(() => {
+          getExtraFields(mpClient, taskID).then(
+            extraFields => resolve(extraFields)
+          );
+        });
+      }
     );
   });
 }
 
 function getTaskWithExtraFields(mpClient, taskID, extraFields) {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     mpClient.task_with_extra_fields(taskID, extraFields).send(
       data => {
         resolve(data.task);
       },
-      err => reject(err)
+      () => {
+        wait().then(() => {
+          getTaskWithExtraFields(mpClient, taskID, extraFields).then(
+            task => resolve(task)
+          );
+        });
+      }
     );
+  });
+}
+
+function wait() {
+  return new Promise(resolve => {
+    log(chalk.magenta('The API limit has been reached, need the pause. Waiting...'));
+    setTimeout(() => {
+      resolve();
+    }, 60000);
   });
 }
 

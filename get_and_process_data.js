@@ -156,7 +156,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   tasks = filter(tasks, t => t.comments.length > 0 || (fldCoreHoursSpent && t[fldCoreHoursSpent.fieldNameInTask]));
   const tasksWithCommentsCount = tasks.length;
   if (tasksWithCommentsCount !== tasksBeforeCommentFilterCount) {
-    log(`Found ${tasksBeforeCommentFilterCount - tasksWithCommentsCount} tasks w/out comments. They are ignored.`);
+    log(`Found ${tasksBeforeCommentFilterCount - tasksWithCommentsCount} tasks w/out comments or core hours. They are ignored.`);
     log(`Tasks remaining after all the filtering: ${tasks.length}`);
   }
 
