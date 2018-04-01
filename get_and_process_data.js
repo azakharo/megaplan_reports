@@ -16,9 +16,6 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   const allProjects = await getProjects(mpClient, projectFilterID);
   log(`Loaded ${allProjects.length} projects`);
   const projects = allProjects;
-  // // Filter projects by start, end
-  // const projects = filter(allProjects, prj => filterByStartEnd(prj, dtStart, dtEnd));
-  // log(`Projects after filtering: ${projects.length}`);
 
   // Get comments per projects
   log('Loading project comments...');
@@ -43,10 +40,12 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   const allTasks = await getTasks(mpClient);
   log(`Loaded ${allTasks.length} tasks`);
-  // Filter tasks by start, end
-  // let tasks = filter(allTasks, task => filterTaskByStartEnd(task, dtStart, dtEnd));
-  // log(`Tasks after filtering by start/end time: ${tasks.length}`);
-  let tasks = allTasks;
+  // Filter tasks by activity time
+  let tasks = filter(allTasks, task => filterTaskByActivityTime(task, dtStart));
+  log(`Tasks after filtering by activity time: ${tasks.length}`);
+  // Filter tasks by creation time
+  tasks = filter(tasks, task => filterTaskByCreationTime(task, dtEnd));
+  log(`Tasks after filtering by creation time: ${tasks.length}`);
 
   // Get task extra field names
   let taskExtraFields = [];
@@ -262,8 +261,12 @@ function calcEmployeeWork(empl, projects, tasks) {
 }
 
 
-function filterTaskByStartEnd(task, start, end) {
-  return !(moment(task.time_created).isSameOrAfter(end) || moment(task.time_updated).isSameOrBefore(start));
+function filterTaskByActivityTime(task, start) {
+  return moment(task.activity).isSameOrAfter(start);
+}
+
+function filterTaskByCreationTime(task, end) {
+  return moment(task.time_created).isSameOrBefore(moment(end).add(6, 'months'));
 }
 
 const getCommentFilter = (dtStart, dtEnd) => (comment) => {
