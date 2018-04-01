@@ -96,12 +96,17 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
   // For each task get core hours spent and planned
   if (taskExtraFields.length > 0) {
     log('Loading task extra fields...');
-    for (const task of tasks) {
+    for (const [taskInd, task] of tasks.entries()) {
       const taskWithExtraFlds = await getTaskWithExtraFields(mpClient, task.id, taskExtraFields);
+      let logStr = "";
       for (const fld of taskExtraFields) {
         const fldName = fld.fieldNameInTask;
-        task[fldName] = +taskWithExtraFlds[fldName];
+        const fldVal = +taskWithExtraFlds[fldName];
+        const fldDispName = fld.translation;
+        task[fldName] = fldVal;
+        logStr += `${fldDispName}=${fldVal} `;
       }
+      log(`task ${taskInd + 1}/${tasks.length}: loaded ${logStr}`);
     }
   }
 
@@ -125,7 +130,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   // Get comments per task
   log('Loading task comments...');
-  for (const [taskInd, task ] of tasks.entries()) {
+  for (const [taskInd, task] of tasks.entries()) {
     let allComments = null;
     try {
       allComments = await getTaskComments(mpClient, task.id, dtStart);
