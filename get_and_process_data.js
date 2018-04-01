@@ -266,7 +266,7 @@ function filterTaskByActivityTime(task, start) {
 }
 
 function filterTaskByCreationTime(task, end) {
-  return moment(task.time_created).isSameOrBefore(moment(end).add(6, 'months'));
+  return moment(task.time_created).isSameOrBefore(moment(end).add(1, 'months'));
 }
 
 const getCommentFilter = (dtStart, dtEnd) => (comment) => {
