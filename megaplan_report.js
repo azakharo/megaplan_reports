@@ -146,6 +146,10 @@ async function main() {
   }
   if (projectFilterID) {
     projectFilterID = parseInt(projectFilterID, 10);
+    log(chalk.yellow(`Project Filter ID: ${projectFilterID}`));
+  }
+  else {
+    log(chalk.magenta('Project Filter ID is NOT specified'));
   }
 
 
