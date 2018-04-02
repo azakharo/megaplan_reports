@@ -166,7 +166,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   log('Calculate work per project');
   for (const proj of projects) {
-    calcProjectWork(proj, tasks, fldCoreHoursSpent);
+    calcProjectWork(proj, tasks, fldCoreHoursSpent, fldCoreHoursPlanned);
   }
 
   log('Calculate work per employee (total)');
@@ -190,7 +190,9 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
 
   // Calc total core hours
   const totalCoreHours = reduce(projects, (total, proj) => (total + proj.totalCoreHours), 0);
-  log(`TOTAL core hours for the specified period: ${totalCoreHours}`);
+  log(`TOTAL core hours: ${totalCoreHours}`);
+  const totalCoreHoursPlanned = reduce(projects, (total, proj) => (total + proj.totalCoreHoursPlanned), 0);
+  log(`TOTAL core hours planned: ${totalCoreHoursPlanned}`);
 
   return {
     employees,
@@ -198,6 +200,7 @@ module.exports = async function getReportData(mpClient, dtStart, dtEnd, projectF
     tasks,
     totalTotal,
     totalCoreHours,
+    totalCoreHoursPlanned,
     fldCoreHoursSpent,
     fldCoreHoursPlanned
   };
@@ -219,7 +222,7 @@ function calcTaskWork(task) {
   });
 }
 
-function calcProjectWork(proj, tasks, fldCoreHoursSpent) {
+function calcProjectWork(proj, tasks, fldCoreHoursSpent, fldCoreHoursPlanned) {
   proj.employee2projCommentWork = {};
   proj.totalProjCommentWork = 0;
 
@@ -237,6 +240,9 @@ function calcProjectWork(proj, tasks, fldCoreHoursSpent) {
   proj.totalWork = reduce(proj.tasks, (total, task) => (total + task.totalWork), proj.totalProjCommentWork);
   if (fldCoreHoursSpent) {
     proj.totalCoreHours = reduce(proj.tasks, (total, task) => (total + task[fldCoreHoursSpent.fieldNameInTask]), 0);
+  }
+  if (fldCoreHoursPlanned) {
+    proj.totalCoreHoursPlanned = reduce(proj.tasks, (total, task) => (total + task[fldCoreHoursPlanned.fieldNameInTask]), 0);
   }
 }
 

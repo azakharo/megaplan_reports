@@ -174,8 +174,11 @@ module.exports = function createXlsx(data, dtStart, dtEnd, outdir) {
     drawCell({t: 's', v: '', s: totalLineStyle}, ws, lineNum, COL_WORK_PLANNED_RATIO);
   }
   drawCell({t: 'n', z: '0', v: data.totalCoreHours, s: totalLineStyle}, ws, lineNum, COL_CORE_HOURS);
-  drawCell({t: 'n', z: '0', v: 0, s: totalLineStyle}, ws, lineNum, COL_CORE_HOURS_PLANNED);
-  drawCell({t: 'n', z: '0', v: 0, s: totalLineStyle}, ws, lineNum, COL_CORE_HOURS_PLANNED_RATIO);
+  drawCell({t: 'n', z: '0', v: data.totalCoreHoursPlanned, s: totalLineStyle}, ws, lineNum, COL_CORE_HOURS_PLANNED);
+  if (data.totalCoreHoursPlanned) {
+    drawCell({t: 'n', z: '0.00', v: data.totalCoreHours / data.totalCoreHoursPlanned, s: totalLineStyle}, ws,
+      lineNum, COL_CORE_HOURS_PLANNED_RATIO);
+  }
   // Draw work hours per employee
   employees.forEach((empl, emplInd) => {
     drawCell({t: 'n', z: '0', v: work2hours(empl.totalWork || 0), s: totalLineStyle}, ws,
